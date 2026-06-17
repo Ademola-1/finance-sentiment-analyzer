@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+feedparser
+yfinance
+matplotlib
+transformers
+torch
