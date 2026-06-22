@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import feedparser
 import yfinance as yf
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from urllib.parse import quote
 from transformers import pipeline
 
@@ -13,39 +14,41 @@ st.set_page_config(page_title="Market Sentiment Monitor", layout="wide",
 st.markdown("""
 <style>
 #MainMenu, footer, header {visibility: hidden;}
-.block-container {padding-top: 2rem; max-width: 1150px;}
+.block-container {padding-top: 2.2rem; max-width: 1140px;}
 html, body, [class*="css"] {font-family: 'Inter', -apple-system, sans-serif;}
-h1, h2, h3, h4 {color: #0f172a; letter-spacing: -0.01em;}
-.app-title {font-size: 2rem; font-weight: 800; margin: 0;}
-.app-sub {color: #64748b; font-size: 0.97rem; margin: 0.4rem 0 0 0;}
-.divider {border-top: 1px solid #e6e8eb; margin: 1.2rem 0 1.6rem 0;}
-.verdict {background: #f8fafc; border-left: 4px solid #1e3a8a; border-radius: 8px;
-          padding: 1.1rem 1.3rem; margin: 0.4rem 0 1.2rem 0;}
-.verdict h3 {font-size: 1.3rem; font-weight: 700; margin: 0 0 0.4rem 0;}
-.verdict p {color: #475569; font-size: 0.97rem; margin: 0;}
-.alert {border-radius: 8px; padding: 1rem 1.2rem; margin: 0.2rem 0 1.4rem 0;
-        background: #fffbeb; border-left: 4px solid #d97706;}
-.alert .tag {font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
-        letter-spacing: 0.05em; color: #b45309; margin-bottom: 0.3rem;}
-.alert p {margin: 0; color: #78350f; font-size: 0.95rem;}
-.card {background: #fff; border: 1px solid #e6e8eb; border-radius: 10px; padding: 1rem 1.2rem;}
-.driver-pos {border-left: 4px solid #16a34a;}
-.driver-neg {border-left: 4px solid #dc2626;}
-.driver-label {font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-        letter-spacing: 0.04em; margin-bottom: 0.3rem;}
-.read-hint {color: #64748b; font-size: 0.88rem; margin: 1rem 0 0.4rem 0;}
-.ov-row {display: flex; align-items: center; gap: 1rem; padding: 0.7rem 0.2rem;
-        border-bottom: 1px solid #f1f5f9;}
-.ov-rank {width: 24px; color: #94a3b8; font-weight: 700; font-size: 0.9rem;}
-.ov-name {width: 170px; font-weight: 600; color: #0f172a;}
-.ov-bar-wrap {flex: 1; height: 8px; background: #f1f5f9; border-radius: 999px; overflow: hidden;}
-.ov-bar {height: 100%; border-radius: 999px;}
-.ov-score {width: 100px; text-align: right; font-weight: 700;}
-.stButton button {background: #1e3a8a; color: #fff; border: none; border-radius: 8px;
-        padding: 0.55rem 1.6rem; font-weight: 600;}
-.stButton button:hover {background: #1e40af; color: #fff;}
-div[data-testid="stMetric"] {background: #fff; border: 1px solid #e6e8eb;
-        border-radius: 10px; padding: 0.9rem 1.1rem;}
+h1,h2,h3,h4 {color:#0f172a; letter-spacing:-0.01em;}
+.hero {background: linear-gradient(135deg, #1e293b 0%, #1e3a8a 100%);
+       border-radius: 16px; padding: 1.8rem 2rem; margin-bottom: 1.6rem; color:#fff;}
+.hero h1 {color:#fff; font-size:1.9rem; font-weight:800; margin:0;}
+.hero p {color:#cbd5e1; font-size:0.98rem; margin:0.5rem 0 0 0; max-width:760px; line-height:1.5;}
+.divider {border-top:1px solid #e6e8eb; margin:1.1rem 0 1.5rem 0;}
+.verdict {background:#f8fafc; border-left:4px solid #1e3a8a; border-radius:10px;
+          padding:1.1rem 1.3rem; margin:0.3rem 0 1.2rem 0;}
+.verdict h3 {font-size:1.3rem; font-weight:700; margin:0 0 0.4rem 0;}
+.verdict p {color:#475569; font-size:0.97rem; margin:0;}
+.alert {border-radius:10px; padding:1rem 1.2rem; margin:0.2rem 0 1.4rem 0;
+        background:#fffbeb; border-left:4px solid #d97706;}
+.alert .tag {font-size:0.72rem; font-weight:800; text-transform:uppercase;
+        letter-spacing:0.05em; color:#b45309; margin-bottom:0.3rem;}
+.alert p {margin:0; color:#78350f; font-size:0.95rem;}
+.card {background:#fff; border:1px solid #e6e8eb; border-radius:12px; padding:1rem 1.2rem;}
+.driver-pos {border-left:4px solid #16a34a;}
+.driver-neg {border-left:4px solid #dc2626;}
+.driver-label {font-size:0.75rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:0.04em; margin-bottom:0.35rem;}
+.read-hint {color:#64748b; font-size:0.88rem; margin:0.6rem 0 0.3rem 0;}
+.ov-row {display:flex; align-items:center; gap:1rem; padding:0.7rem 0.2rem;
+        border-bottom:1px solid #f1f5f9;}
+.ov-rank {width:24px; color:#94a3b8; font-weight:700; font-size:0.9rem;}
+.ov-name {width:170px; font-weight:600; color:#0f172a;}
+.ov-bar-wrap {flex:1; height:9px; background:#f1f5f9; border-radius:999px; overflow:hidden;}
+.ov-bar {height:100%; border-radius:999px;}
+.ov-score {width:100px; text-align:right; font-weight:700;}
+.stButton button {background:#1e3a8a; color:#fff; border:none; border-radius:9px;
+        padding:0.55rem 1.6rem; font-weight:600;}
+.stButton button:hover {background:#1e40af; color:#fff;}
+div[data-testid="stMetric"] {background:#fff; border:1px solid #e6e8eb;
+        border-radius:12px; padding:0.9rem 1.1rem;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -153,34 +156,6 @@ def relationship(net_ratio, prices):
         return None
     return float(np.corrcoef(sa.values, pa.values)[0, 1])
 
-def lead_lag(net_ratio, prices, max_lag=3):
-    s, p = net_ratio.dropna(), prices.dropna()
-    if len(s) < 8 or len(p) < 8:
-        return None
-    sd = pd.Series(s.values, index=[d.date() for d in s.index])
-    pp = pd.Series([float(x) for x in p.values], index=[d.date() for d in p.index])
-    pct = pp.pct_change()
-    common = sorted(set(sd.index) & set(pct.index))
-    if len(common) < 8:
-        return None
-    mood = sd.loc[common].astype(float)
-    ret = pct.loc[common].astype(float)
-
-    results = {}
-    for lag in range(0, max_lag + 1):
-        if lag == 0:
-            a, b = mood, ret
-        else:
-            a, b = mood.iloc[:-lag], ret.iloc[lag:]
-        if len(a) < 6 or a.std() == 0 or b.std() == 0:
-            continue
-        results[lag] = float(np.corrcoef(a.values, b.values)[0, 1])
-
-    if not results:
-        return None
-    best_lag = max(results, key=lambda k: abs(results[k]))
-    return best_lag, results[best_lag], results
-
 def divergence(net_ratio, prices):
     s, p = net_ratio.dropna(), prices.dropna()
     if len(s) < 6 or len(p) < 6:
@@ -225,42 +200,52 @@ def meter(score):
     return f'''
     <div style="margin:0.3rem 0 0.6rem 0;">
       <div style="display:flex; justify-content:space-between; align-items:baseline;">
-        <span style="font-size:2.6rem; font-weight:800; color:{color};">{score:.0f}<span style="font-size:1rem; color:#94a3b8; font-weight:600;"> / 100</span></span>
-        <span style="background:{color}1a; color:{color}; padding:0.3rem 0.8rem; border-radius:999px; font-weight:700; font-size:0.85rem;">{label}</span>
+        <span style="font-size:2.8rem; font-weight:800; color:{color};">{score:.0f}<span style="font-size:1rem; color:#94a3b8; font-weight:600;"> / 100</span></span>
+        <span style="background:{color}1a; color:{color}; padding:0.3rem 0.85rem; border-radius:999px; font-weight:700; font-size:0.85rem;">{label}</span>
       </div>
-      <div style="position:relative; height:10px; border-radius:999px; margin-top:0.6rem; background:linear-gradient(90deg,#dc2626,#e5e7eb,#16a34a);">
-        <div style="position:absolute; top:-3px; left:calc({score:.0f}% - 2px); width:4px; height:16px; background:#0f172a; border-radius:2px;"></div>
+      <div style="position:relative; height:11px; border-radius:999px; margin-top:0.6rem; background:linear-gradient(90deg,#dc2626,#e5e7eb,#16a34a);">
+        <div style="position:absolute; top:-3px; left:calc({score:.0f}% - 2px); width:4px; height:17px; background:#0f172a; border-radius:2px;"></div>
       </div>
       <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#94a3b8; margin-top:0.3rem;">
         <span>Bearish</span><span>Neutral</span><span>Bullish</span>
       </div>
     </div>'''
 
-def styled_chart(name, symbol, prices, net_ratio):
-    plt.rcParams.update({"font.size": 11, "axes.edgecolor": "#cbd5e1", "axes.linewidth": 0.8,
-                         "xtick.color": "#64748b", "ytick.color": "#64748b"})
-    fig, ax1 = plt.subplots(figsize=(11, 5))
-    fig.patch.set_facecolor("white"); ax1.set_facecolor("white")
-    ax1.plot(prices.index, prices.values, color="#1e3a8a", linewidth=2.2)
-    ax1.set_ylabel("Share Price ($)", color="#1e3a8a", fontweight="600")
-    ax1.tick_params(axis="y", labelcolor="#1e3a8a")
-    ax1.grid(True, axis="y", color="#f1f5f9", linewidth=1)
-    ax1.spines["top"].set_visible(False)
-    ax2 = ax1.twinx()
-    ax2.plot(net_ratio.index, net_ratio.values, color="#dc2626", linewidth=2.2)
-    ax2.set_ylabel("News Mood", color="#dc2626", fontweight="600")
-    ax2.tick_params(axis="y", labelcolor="#dc2626")
-    ax2.axhline(0, color="#94a3b8", linestyle="--", linewidth=0.8)
-    ax2.spines["top"].set_visible(False)
-    ax1.set_title(f"{name} ({symbol}): News Mood vs Share Price",
-                  fontsize=13, fontweight="700", color="#0f172a", loc="left", pad=14)
-    fig.tight_layout()
+def plotly_chart(name, symbol, prices, net_ratio):
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_trace(go.Scatter(
+        x=prices.index, y=prices.values, name="Share price",
+        line=dict(color="#1e3a8a", width=2.6),
+        hovertemplate="%{x|%b %d}<br>Price: $%{y:.2f}<extra></extra>"),
+        secondary_y=False)
+    fig.add_trace(go.Scatter(
+        x=net_ratio.index, y=net_ratio.values, name="News mood",
+        line=dict(color="#dc2626", width=2.6),
+        hovertemplate="%{x|%b %d}<br>Mood: %{y:.2f}<extra></extra>"),
+        secondary_y=True)
+    fig.add_hline(y=0, line_dash="dash", line_color="#cbd5e1", secondary_y=True)
+    fig.update_layout(
+        title=dict(text=f"<b>{name} ({symbol})</b>  News Mood vs Share Price",
+                   font=dict(size=17, color="#0f172a")),
+        height=440, plot_bgcolor="white", paper_bgcolor="white",
+        font=dict(family="Inter, sans-serif", color="#334155"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0,
+                    bgcolor="rgba(0,0,0,0)"),
+        margin=dict(l=10, r=10, t=70, b=10), hovermode="x unified")
+    fig.update_xaxes(showgrid=False, linecolor="#e2e8f0")
+    fig.update_yaxes(title_text="Share Price ($)", secondary_y=False,
+                     showgrid=True, gridcolor="#f1f5f9", linecolor="#e2e8f0",
+                     title_font_color="#1e3a8a", tickfont_color="#1e3a8a")
+    fig.update_yaxes(title_text="News Mood", secondary_y=True,
+                     showgrid=False, title_font_color="#dc2626", tickfont_color="#dc2626")
     return fig
 
-st.markdown('<p class="app-title">Market Sentiment Monitor</p>'
-            '<p class="app-sub">Reads the latest news on any public company, scores the mood with FinBERT, a model trained on financial language, then tracks it against the share price and flags where the two disagree.</p>',
-            unsafe_allow_html=True)
-st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+st.markdown("""
+<div class="hero">
+  <h1>Market Sentiment Monitor</h1>
+  <p>Reads the latest news on any public company, scores the mood with FinBERT, a model trained on financial language, then tracks it against the share price and flags where the two disagree.</p>
+</div>
+""", unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["Market Overview", "Company Deep Dive"])
 
@@ -304,9 +289,7 @@ with tab2:
         if news is None or prices is None or len(prices.dropna()) == 0:
             st.warning(f"Could not find enough data for '{symbol}'. Check the ticker symbol and try again.")
         else:
-            out_labels = news["sentiment"].tolist()
-            out_scores = news["confidence"].tolist()
-            score = weighted_score(out_labels, out_scores)
+            score = weighted_score(news["sentiment"].tolist(), news["confidence"].tolist())
             headline, note, pos, neg, neu, total = verdict_text(name, news, net_ratio, prices, score)
 
             st.markdown(f'<div class="verdict"><h3>{headline}</h3><p>{note}</p></div>', unsafe_allow_html=True)
@@ -330,16 +313,8 @@ with tab2:
                     sign = "positive" if rel > 0 else "negative"
                     st.caption(f"Over this window, mood and price showed a {strength} {sign} relationship (correlation about {rel:.2f}). Short windows are noisy, so treat this as descriptive, not predictive.")
 
-                ll = lead_lag(net_ratio, prices)
-                if ll is not None:
-                    best_lag, best_corr, _ = ll
-                    if best_lag == 0:
-                        st.caption(f"Lead-lag check: mood and same-day price moves line up most closely (correlation about {best_corr:.2f}). No clear lead either way over this window.")
-                    else:
-                        st.caption(f"Lead-lag check: today's news mood lined up most closely with the price move about {best_lag} day(s) later (correlation about {best_corr:.2f}). Suggestive of mood leading price here, though short windows are noisy.")
-
-            st.markdown('<p class="read-hint">Blue line: share price. Red line: news mood. When it rises, coverage is turning more positive; when it falls, more negative.</p>', unsafe_allow_html=True)
-            st.pyplot(styled_chart(name, symbol, prices, net_ratio))
+            st.markdown('<p class="read-hint">Hover any point for the exact date, price and mood. Blue: share price. Red: news mood.</p>', unsafe_allow_html=True)
+            st.plotly_chart(plotly_chart(name, symbol, prices, net_ratio), use_container_width=True)
 
             st.markdown("#### What's moving the mood")
             d1, d2 = st.columns(2)
@@ -358,4 +333,4 @@ with tab2:
             st.dataframe(table, use_container_width=True, hide_index=True)
 
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-st.caption("Built with FinBERT, yfinance and Streamlit. Sentiment is confidence-weighted and de-duplicated. For research and educational use, not financial advice.")
+st.caption("Built with FinBERT, yfinance, Plotly and Streamlit. Sentiment is confidence-weighted and de-duplicated. For research and educational use, not financial advice.")
