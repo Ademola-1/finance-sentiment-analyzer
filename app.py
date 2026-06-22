@@ -19,45 +19,65 @@ h1, h2, h3, h4 {color: #0f172a; letter-spacing: -0.01em;}
 .app-sub {color: #64748b; font-size: 0.97rem; margin: 0.4rem 0 0 0;}
 .divider {border-top: 1px solid #e6e8eb; margin: 1.2rem 0 1.6rem 0;}
 .verdict {background: #f8fafc; border-left: 4px solid #1e3a8a; border-radius: 8px;
-          padding: 1.1rem 1.3rem; margin: 0.4rem 0 1.4rem 0;}
+          padding: 1.1rem 1.3rem; margin: 0.4rem 0 1.2rem 0;}
 .verdict h3 {font-size: 1.3rem; font-weight: 700; margin: 0 0 0.4rem 0;}
 .verdict p {color: #475569; font-size: 0.97rem; margin: 0;}
+.alert {border-radius: 8px; padding: 1rem 1.2rem; margin: 0.2rem 0 1.4rem 0;
+        background: #fffbeb; border-left: 4px solid #d97706;}
+.alert .tag {font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.05em; color: #b45309; margin-bottom: 0.3rem;}
+.alert p {margin: 0; color: #78350f; font-size: 0.95rem;}
 .card {background: #fff; border: 1px solid #e6e8eb; border-radius: 10px; padding: 1rem 1.2rem;}
 .driver-pos {border-left: 4px solid #16a34a;}
 .driver-neg {border-left: 4px solid #dc2626;}
 .driver-label {font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-          letter-spacing: 0.04em; margin-bottom: 0.3rem;}
+        letter-spacing: 0.04em; margin-bottom: 0.3rem;}
 .read-hint {color: #64748b; font-size: 0.88rem; margin: 1rem 0 0.4rem 0;}
 .ov-row {display: flex; align-items: center; gap: 1rem; padding: 0.7rem 0.2rem;
-          border-bottom: 1px solid #f1f5f9;}
+        border-bottom: 1px solid #f1f5f9;}
 .ov-rank {width: 24px; color: #94a3b8; font-weight: 700; font-size: 0.9rem;}
-.ov-name {width: 150px; font-weight: 600; color: #0f172a;}
+.ov-name {width: 170px; font-weight: 600; color: #0f172a;}
 .ov-bar-wrap {flex: 1; height: 8px; background: #f1f5f9; border-radius: 999px; overflow: hidden;}
 .ov-bar {height: 100%; border-radius: 999px;}
-.ov-score {width: 90px; text-align: right; font-weight: 700;}
+.ov-score {width: 100px; text-align: right; font-weight: 700;}
 .stButton button {background: #1e3a8a; color: #fff; border: none; border-radius: 8px;
-          padding: 0.55rem 1.6rem; font-weight: 600;}
+        padding: 0.55rem 1.6rem; font-weight: 600;}
 .stButton button:hover {background: #1e40af; color: #fff;}
 div[data-testid="stMetric"] {background: #fff; border: 1px solid #e6e8eb;
-          border-radius: 10px; padding: 0.9rem 1.1rem;}
+        border-radius: 10px; padding: 0.9rem 1.1rem;}
 </style>
 """, unsafe_allow_html=True)
 
 tickers = {
-    "AAPL": "Apple", "TSLA": "Tesla", "NVDA": "Nvidia", "MSFT": "Microsoft",
-    "AMZN": "Amazon", "GOOGL": "Google", "META": "Meta", "NFLX": "Netflix",
-    "AMD": "AMD", "JPM": "JPMorgan"
+    "AAPL": "Apple", "MSFT": "Microsoft", "NVDA": "Nvidia", "AMZN": "Amazon",
+    "GOOGL": "Google", "META": "Meta", "TSLA": "Tesla", "NFLX": "Netflix",
+    "AMD": "AMD", "JPM": "JPMorgan", "BAC": "Bank of America", "GS": "Goldman Sachs",
+    "V": "Visa", "MA": "Mastercard", "DIS": "Disney", "KO": "Coca-Cola",
+    "PEP": "PepsiCo", "WMT": "Walmart", "NKE": "Nike", "BA": "Boeing",
+    "INTC": "Intel", "ORCL": "Oracle", "CRM": "Salesforce", "UBER": "Uber",
+    "PYPL": "PayPal", "XOM": "ExxonMobil", "PFE": "Pfizer", "T": "AT&T"
 }
 
 @st.cache_resource
 def load_model():
     return pipeline("text-classification", model="ProsusAI/finbert")
 
+@st.cache_data(ttl=86400)
+def resolve_name(symbol):
+    try:
+        info = yf.Ticker(symbol).get_info()
+        return info.get("shortName") or info.get("longName") or symbol
+    except Exception:
+        return symbol
+
 @st.cache_data(ttl=1800)
-def get_news(name):
-    url = f"https://news.google.com/rss/search?q={name}+stock&hl=en-US&gl=US&ceid=US:en"
+def get_news(query):
+    url = f"https://news.google.com/rss/search?q={query}+stock&hl=en-US&gl=US&ceid=US:en"
     feed = feedparser.parse(url)
-    return pd.DataFrame([{"headline": e.title, "published": e.published} for e in feed.entries])
+    df = pd.DataFrame([{"headline": e.title, "published": e.published} for e in feed.entries])
+    if not df.empty:
+        df = df.drop_duplicates(subset="headline").reset_index(drop=True)
+    return df
 
 @st.cache_data(ttl=1800)
 def get_prices(symbol):
@@ -73,8 +93,13 @@ def score_meta(score):
         return "Bearish", "#dc2626"
     return "Neutral", "#64748b"
 
-def sentiment_score(pos, neg, total):
-    return max(0.0, min(100.0, 50 + 50 * (pos - neg) / max(total, 1)))
+def weighted_score(labels, scores):
+    pos = sum(s for l, s in zip(labels, scores) if l == "positive")
+    neg = sum(s for l, s in zip(labels, scores) if l == "negative")
+    total = sum(scores)
+    if total == 0:
+        return 50.0
+    return max(0.0, min(100.0, 50 + 50 * (pos - neg) / total))
 
 @st.cache_data(ttl=1800, show_spinner=False)
 def market_overview(limit=25):
@@ -85,28 +110,27 @@ def market_overview(limit=25):
         if news.empty:
             continue
         heads = news["headline"].head(limit).tolist()
-        labels = [r["label"] for r in model(heads, truncation=True)]
-        pos, neg, neu = labels.count("positive"), labels.count("negative"), labels.count("neutral")
-        total = pos + neg + neu
-        rows.append({"symbol": sym, "name": nm,
-                     "score": sentiment_score(pos, neg, total)})
+        out = model(heads, truncation=True)
+        labels = [r["label"] for r in out]
+        scores = [float(r["score"]) for r in out]
+        rows.append({"symbol": sym, "name": nm, "score": weighted_score(labels, scores)})
     return pd.DataFrame(rows).sort_values("score", ascending=False).reset_index(drop=True)
 
-def analyze(symbol):
-    name = tickers[symbol]
+def analyze(symbol, name):
     model = load_model()
     news = get_news(name)
     if news.empty:
         return None, None, None
     news = news.head(120)
-    scored = model(news["headline"].tolist(), truncation=True)
-    news["sentiment"] = [r["label"] for r in scored]
-    news["confidence"] = [float(r["score"]) for r in scored]
+    out = model(news["headline"].tolist(), truncation=True)
+    news["sentiment"] = [r["label"] for r in out]
+    news["confidence"] = [float(r["score"]) for r in out]
     news["published"] = pd.to_datetime(news["published"], errors="coerce", utc=True)
     news = news.dropna(subset=["published"]).set_index("published").sort_index()
 
-    daily_net = news["sentiment"].resample("D").apply(
-        lambda x: (x == "positive").sum() - (x == "negative").sum())
+    daily_net = news.resample("D").apply(
+        lambda d: sum(c if s == "positive" else -c if s == "negative" else 0
+                      for s, c in zip(d["sentiment"], d["confidence"])))
     daily_count = news["sentiment"].resample("D").count()
     net_ratio = daily_net / daily_count.where(daily_count >= 2, np.nan)
     net_ratio = net_ratio.rolling(7, min_periods=2).mean().ffill()
@@ -128,11 +152,23 @@ def relationship(net_ratio, prices):
         return None
     return float(np.corrcoef(sa.values, pa.values)[0, 1])
 
-def verdict_text(name, news, net_ratio, prices):
+def divergence(net_ratio, prices):
+    s, p = net_ratio.dropna(), prices.dropna()
+    if len(s) < 6 or len(p) < 6:
+        return None
+    ms = s.iloc[-1] - s.iloc[-min(7, len(s))]
+    pc = (p.iloc[-1] - p.iloc[-min(7, len(p))]) / p.iloc[-min(7, len(p))]
+    if ms > 0.05 and pc < -0.01:
+        return "News mood has been improving while the share price has been falling. When the two pull apart like this, it can flag a market that has not yet caught up to better news, a gap worth watching."
+    if ms < -0.05 and pc > 0.01:
+        return "News mood has been souring while the share price has been rising. A rising price on worsening coverage can signal momentum running ahead of the story, a gap worth watching."
+    return None
+
+def verdict_text(name, news, net_ratio, prices, score):
     c = news["sentiment"].value_counts()
     pos, neg, neu = int(c.get("positive", 0)), int(c.get("negative", 0)), int(c.get("neutral", 0))
     total = max(pos + neg + neu, 1)
-    mood = "leaning positive" if pos > neg * 1.3 else "leaning negative" if neg > pos * 1.3 else "mixed"
+    mood = "leaning positive" if score >= 55 else "leaning negative" if score <= 45 else "mixed"
     headline = f"News on {name} is {mood} ({pos/total*100:.0f}% of recent headlines positive)"
 
     direction = ""
@@ -174,7 +210,7 @@ def meter(score):
 def styled_chart(name, symbol, prices, net_ratio):
     plt.rcParams.update({"font.size": 11, "axes.edgecolor": "#cbd5e1", "axes.linewidth": 0.8,
                          "xtick.color": "#64748b", "ytick.color": "#64748b"})
-    fig, ax1 = plt.subplots(figsize=(11, 4.6))
+    fig, ax1 = plt.subplots(figsize=(11, 5))
     fig.patch.set_facecolor("white"); ax1.set_facecolor("white")
     ax1.plot(prices.index, prices.values, color="#1e3a8a", linewidth=2.2)
     ax1.set_ylabel("Share Price ($)", color="#1e3a8a", fontweight="600")
@@ -193,7 +229,7 @@ def styled_chart(name, symbol, prices, net_ratio):
     return fig
 
 st.markdown('<p class="app-title">Market Sentiment Monitor</p>'
-            '<p class="app-sub">Reads the latest news on major companies, scores the mood with FinBERT, an AI model trained on financial language, then tracks it against share price.</p>',
+            '<p class="app-sub">Reads the latest news on any public company, scores the mood with FinBERT, a model trained on financial language, then tracks it against the share price and flags where the two disagree.</p>',
             unsafe_allow_html=True)
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
@@ -201,7 +237,7 @@ tab1, tab2 = st.tabs(["Market Overview", "Company Deep Dive"])
 
 with tab1:
     st.markdown("#### Where the market mood sits right now")
-    st.caption("Live sentiment across all tracked companies, ranked most positive to most negative. Runs once, then cached for 30 minutes.")
+    st.caption("Live, confidence-weighted sentiment across tracked companies, ranked most positive to most negative. Runs once, then cached for 30 minutes.")
     if st.button("Scan the market", key="scan"):
         with st.spinner("Scoring sentiment across all companies..."):
             ov = market_overview()
@@ -221,28 +257,38 @@ with tab1:
                         f'Open the Deep Dive tab for the full breakdown on any company.</p>', unsafe_allow_html=True)
 
 with tab2:
-    ca, cb = st.columns([3, 1])
+    st.markdown("Pick a company below, or type any ticker symbol (for example DIS, KO, BA) to analyze it live.")
+    ca, cb, cc = st.columns([2, 2, 1])
     with ca:
-        symbol = st.selectbox("Company", list(tickers.keys()),
+        picked = st.selectbox("From the list", list(tickers.keys()),
                               format_func=lambda s: f"{tickers[s]}  ({s})", label_visibility="collapsed")
     with cb:
+        typed = st.text_input("Or type a ticker", placeholder="Any ticker, e.g. DIS", label_visibility="collapsed")
+    with cc:
         run = st.button("Analyze", use_container_width=True, key="dive")
 
     if run:
+        symbol = typed.strip().upper() if typed.strip() else picked
+        name = tickers.get(symbol) or resolve_name(symbol)
         with st.spinner("Reading the latest news and scoring the mood..."):
-            news, net_ratio, prices = analyze(symbol)
-        if news is None:
-            st.warning("No recent news found for this company. Try another.")
+            news, net_ratio, prices = analyze(symbol, name)
+        if news is None or prices is None or len(prices.dropna()) == 0:
+            st.warning(f"Could not find enough data for '{symbol}'. Check the ticker symbol and try again.")
         else:
-            name = tickers[symbol]
-            headline, note, pos, neg, neu, total = verdict_text(name, news, net_ratio, prices)
-            score = sentiment_score(pos, neg, total)
+            out_labels = news["sentiment"].tolist()
+            out_scores = news["confidence"].tolist()
+            score = weighted_score(out_labels, out_scores)
+            headline, note, pos, neg, neu, total = verdict_text(name, news, net_ratio, prices, score)
 
             st.markdown(f'<div class="verdict"><h3>{headline}</h3><p>{note}</p></div>', unsafe_allow_html=True)
 
+            div_msg = divergence(net_ratio, prices)
+            if div_msg:
+                st.markdown(f'<div class="alert"><div class="tag">Divergence detected</div><p>{div_msg} This is a descriptive observation, not a prediction or financial advice.</p></div>', unsafe_allow_html=True)
+
             left, right = st.columns([1, 1])
             with left:
-                st.markdown("**Overall sentiment score**")
+                st.markdown("**Overall sentiment score** (confidence-weighted)")
                 st.markdown(meter(score), unsafe_allow_html=True)
             with right:
                 m1, m2, m3 = st.columns(3)
@@ -275,4 +321,4 @@ with tab2:
             st.dataframe(table, use_container_width=True, hide_index=True)
 
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-st.caption("Built with FinBERT, yfinance and Streamlit. For research and educational use, not financial advice.")
+st.caption("Built with FinBERT, yfinance and Streamlit. Sentiment is confidence-weighted and de-duplicated. For research and educational use, not financial advice.")
