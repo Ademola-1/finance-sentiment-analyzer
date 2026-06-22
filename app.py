@@ -153,6 +153,34 @@ def relationship(net_ratio, prices):
         return None
     return float(np.corrcoef(sa.values, pa.values)[0, 1])
 
+def lead_lag(net_ratio, prices, max_lag=3):
+    s, p = net_ratio.dropna(), prices.dropna()
+    if len(s) < 8 or len(p) < 8:
+        return None
+    sd = pd.Series(s.values, index=[d.date() for d in s.index])
+    pp = pd.Series([float(x) for x in p.values], index=[d.date() for d in p.index])
+    pct = pp.pct_change()
+    common = sorted(set(sd.index) & set(pct.index))
+    if len(common) < 8:
+        return None
+    mood = sd.loc[common].astype(float)
+    ret = pct.loc[common].astype(float)
+
+    results = {}
+    for lag in range(0, max_lag + 1):
+        if lag == 0:
+            a, b = mood, ret
+        else:
+            a, b = mood.iloc[:-lag], ret.iloc[lag:]
+        if len(a) < 6 or a.std() == 0 or b.std() == 0:
+            continue
+        results[lag] = float(np.corrcoef(a.values, b.values)[0, 1])
+
+    if not results:
+        return None
+    best_lag = max(results, key=lambda k: abs(results[k]))
+    return best_lag, results[best_lag], results
+
 def divergence(net_ratio, prices):
     s, p = net_ratio.dropna(), prices.dropna()
     if len(s) < 6 or len(p) < 6:
@@ -301,6 +329,14 @@ with tab2:
                     strength = "strong" if abs(rel) > 0.6 else "moderate" if abs(rel) > 0.3 else "weak"
                     sign = "positive" if rel > 0 else "negative"
                     st.caption(f"Over this window, mood and price showed a {strength} {sign} relationship (correlation about {rel:.2f}). Short windows are noisy, so treat this as descriptive, not predictive.")
+
+                ll = lead_lag(net_ratio, prices)
+                if ll is not None:
+                    best_lag, best_corr, _ = ll
+                    if best_lag == 0:
+                        st.caption(f"Lead-lag check: mood and same-day price moves line up most closely (correlation about {best_corr:.2f}). No clear lead either way over this window.")
+                    else:
+                        st.caption(f"Lead-lag check: today's news mood lined up most closely with the price move about {best_lag} day(s) later (correlation about {best_corr:.2f}). Suggestive of mood leading price here, though short windows are noisy.")
 
             st.markdown('<p class="read-hint">Blue line: share price. Red line: news mood. When it rises, coverage is turning more positive; when it falls, more negative.</p>', unsafe_allow_html=True)
             st.pyplot(styled_chart(name, symbol, prices, net_ratio))
