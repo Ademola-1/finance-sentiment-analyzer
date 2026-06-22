@@ -211,6 +211,22 @@ def meter(score):
       </div>
     </div>'''
 
+def style_sentiment_table(news):
+    rows = news[["headline", "sentiment"]].tail(15).iloc[::-1].reset_index(drop=True)
+    colors = {"positive": ("#16a34a", "#dcfce7"),
+              "negative": ("#dc2626", "#fee2e2"),
+              "neutral": ("#64748b", "#f1f5f9")}
+    html = '<div style="border:1px solid #e6e8eb; border-radius:12px; overflow:hidden;">'
+    for i, r in rows.iterrows():
+        bg = "#ffffff" if i % 2 == 0 else "#fafbfc"
+        fg, chip = colors.get(r["sentiment"], colors["neutral"])
+        html += (f'<div style="display:flex; align-items:center; gap:1rem; padding:0.7rem 1rem; background:{bg}; border-bottom:1px solid #f1f5f9;">'
+                 f'<div style="flex:1; color:#334155; font-size:0.92rem;">{r["headline"]}</div>'
+                 f'<span style="background:{chip}; color:{fg}; padding:0.22rem 0.7rem; border-radius:999px; font-size:0.75rem; font-weight:700; text-transform:capitalize; white-space:nowrap;">{r["sentiment"]}</span>'
+                 f'</div>')
+    html += '</div>'
+    return html
+
 def plotly_chart(name, symbol, prices, net_ratio):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(go.Scatter(
@@ -328,9 +344,7 @@ with tab2:
                     st.markdown(f'<div class="card driver-neg"><div class="driver-label" style="color:#dc2626;">Strongest negative</div>{neg_rows.iloc[0]["headline"]}</div>', unsafe_allow_html=True)
 
             st.markdown("#### Latest headlines")
-            table = news[["headline", "sentiment"]].tail(15).iloc[::-1].reset_index(drop=True)
-            table.columns = ["Headline", "Sentiment"]
-            st.dataframe(table, use_container_width=True, hide_index=True)
+            st.markdown(style_sentiment_table(news), unsafe_allow_html=True)
 
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 st.caption("Built with FinBERT, yfinance, Plotly and Streamlit. Sentiment is confidence-weighted and de-duplicated. For research and educational use, not financial advice.")
