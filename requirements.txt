@@ -4,5 +4,6 @@ numpy
 feedparser
 yfinance
 matplotlib
+plotly
 transformers
 torch
