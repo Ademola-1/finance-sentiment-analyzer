@@ -187,13 +187,13 @@ def styled_chart(name, symbol, prices, net_ratio):
     ax2.tick_params(axis="y", labelcolor="#dc2626")
     ax2.axhline(0, color="#94a3b8", linestyle="--", linewidth=0.8)
     ax2.spines["top"].set_visible(False)
-    ax1.set_title(f"{name} ({symbol})   News Mood vs Share Price",
+    ax1.set_title(f"{name} ({symbol}): News Mood vs Share Price",
                   fontsize=13, fontweight="700", color="#0f172a", loc="left", pad=14)
     fig.tight_layout()
     return fig
 
 st.markdown('<p class="app-title">Market Sentiment Monitor</p>'
-            '<p class="app-sub">Reads the latest news on major companies, scores the mood with FinBERT — an AI model trained on financial language — and tracks it against share price.</p>',
+            '<p class="app-sub">Reads the latest news on major companies, scores the mood with FinBERT, an AI model trained on financial language, then tracks it against share price.</p>',
             unsafe_allow_html=True)
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
@@ -214,7 +214,7 @@ with tab1:
                 html += (f'<div class="ov-row"><div class="ov-rank">{i+1}</div>'
                          f'<div class="ov-name">{row["name"]} ({row["symbol"]})</div>'
                          f'<div class="ov-bar-wrap"><div class="ov-bar" style="width:{row["score"]:.0f}%; background:{color};"></div></div>'
-                         f'<div class="ov-score" style="color:{color};">{row["score"]:.0f} · {label}</div></div>')
+                         f'<div class="ov-score" style="color:{color};">{row["score"]:.0f}, {label}</div></div>')
             st.markdown(html, unsafe_allow_html=True)
             top, bottom = ov.iloc[0], ov.iloc[-1]
             st.markdown(f'<p class="read-hint">Most positive coverage: <b>{top["name"]}</b>. Most negative: <b>{bottom["name"]}</b>. '
@@ -253,9 +253,9 @@ with tab2:
                 if rel is not None:
                     strength = "strong" if abs(rel) > 0.6 else "moderate" if abs(rel) > 0.3 else "weak"
                     sign = "positive" if rel > 0 else "negative"
-                    st.caption(f"Over this window, mood and price showed a {strength} {sign} relationship (correlation ≈ {rel:.2f}). Short windows are noisy — this is descriptive, not predictive.")
+                    st.caption(f"Over this window, mood and price showed a {strength} {sign} relationship (correlation about {rel:.2f}). Short windows are noisy, so treat this as descriptive, not predictive.")
 
-            st.markdown('<p class="read-hint">Blue line: share price. Red line: news mood — rising means coverage is turning more positive, falling means more negative.</p>', unsafe_allow_html=True)
+            st.markdown('<p class="read-hint">Blue line: share price. Red line: news mood. When it rises, coverage is turning more positive; when it falls, more negative.</p>', unsafe_allow_html=True)
             st.pyplot(styled_chart(name, symbol, prices, net_ratio))
 
             st.markdown("#### What's moving the mood")
@@ -275,4 +275,4 @@ with tab2:
             st.dataframe(table, use_container_width=True, hide_index=True)
 
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-st.caption("Built with FinBERT, yfinance and Streamlit. For research and educational use — not financial advice.")
+st.caption("Built with FinBERT, yfinance and Streamlit. For research and educational use, not financial advice.")
