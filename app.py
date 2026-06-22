@@ -4,6 +4,7 @@ import numpy as np
 import feedparser
 import yfinance as yf
 import matplotlib.pyplot as plt
+from urllib.parse import quote
 from transformers import pipeline
 
 st.set_page_config(page_title="Market Sentiment Monitor", layout="wide",
@@ -72,7 +73,7 @@ def resolve_name(symbol):
 
 @st.cache_data(ttl=1800)
 def get_news(query):
-    url = f"https://news.google.com/rss/search?q={query}+stock&hl=en-US&gl=US&ceid=US:en"
+    url = f"https://news.google.com/rss/search?q={quote(query)}+stock&hl=en-US&gl=US&ceid=US:en"
     feed = feedparser.parse(url)
     df = pd.DataFrame([{"headline": e.title, "published": e.published} for e in feed.entries])
     if not df.empty:
