@@ -288,30 +288,34 @@ def style_sentiment_table(news):
 def plotly_chart(name, symbol, prices, net_ratio):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(go.Scatter(
-        x=prices.index, y=prices.values, name="Share price",
-        line=dict(color="#1e3a8a", width=2.6),
-        hovertemplate="%{x|%b %d}<br>Price: $%{y:.2f}<extra></extra>"),
-        secondary_y=False)
-    fig.add_trace(go.Scatter(
         x=net_ratio.index, y=net_ratio.values, name="News mood",
-        line=dict(color="#dc2626", width=2.6),
+        line=dict(color="#dc2626", width=2.4, shape="spline"),
+        fill="tozeroy", fillcolor="rgba(220,38,38,0.08)",
         hovertemplate="%{x|%b %d}<br>Mood: %{y:.2f}<extra></extra>"),
         secondary_y=True)
-    fig.add_hline(y=0, line_dash="dash", line_color="#cbd5e1", secondary_y=True)
+    fig.add_trace(go.Scatter(
+        x=prices.index, y=prices.values, name="Share price",
+        line=dict(color="#1e3a8a", width=3, shape="spline"),
+        hovertemplate="%{x|%b %d}<br>Price: $%{y:.2f}<extra></extra>"),
+        secondary_y=False)
+    fig.add_hline(y=0, line_dash="dot", line_color="#cbd5e1", secondary_y=True)
     fig.update_layout(
         title=dict(text=f"<b>{name} ({symbol})</b>  News Mood vs Share Price",
                    font=dict(size=17, color="#0f172a")),
-        height=440, plot_bgcolor="white", paper_bgcolor="white",
-        font=dict(family="Inter, sans-serif", color="#334155"),
+        height=470, plot_bgcolor="white", paper_bgcolor="white",
+        font=dict(family="Inter, sans-serif", color="#334155", size=12),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0,
-                    bgcolor="rgba(0,0,0,0)"),
-        margin=dict(l=10, r=10, t=70, b=10), hovermode="x unified")
-    fig.update_xaxes(showgrid=False, linecolor="#e2e8f0")
+                    bgcolor="rgba(0,0,0,0)", font=dict(size=12)),
+        margin=dict(l=10, r=10, t=70, b=10),
+        hovermode="x unified",
+        hoverlabel=dict(bgcolor="white", bordercolor="#e2e8f0", font_size=12))
+    fig.update_xaxes(showgrid=False, linecolor="#e2e8f0",
+                     rangeslider=dict(visible=True, thickness=0.06, bgcolor="#f8fafc"))
     fig.update_yaxes(title_text="Share Price ($)", secondary_y=False,
                      showgrid=True, gridcolor="#f1f5f9", linecolor="#e2e8f0",
-                     title_font_color="#1e3a8a", tickfont_color="#1e3a8a")
+                     title_font_color="#1e3a8a", tickfont_color="#1e3a8a", tickprefix="$")
     fig.update_yaxes(title_text="News Mood", secondary_y=True,
-                     showgrid=False, title_font_color="#dc2626", tickfont_color="#dc2626")
+                     showgrid=False, title_font_color="#dc2626", tickfont_color="#dc2626", zeroline=False)
     return fig
 
 st.markdown("""
@@ -324,8 +328,27 @@ st.markdown("""
 tab1, tab2 = st.tabs(["Market Overview", "Company Deep Dive"])
 
 with tab1:
-    st.markdown("#### Where the market mood sits right now")
-    st.caption("Live, confidence-weighted sentiment across tracked companies, ranked most positive to most negative. Runs once, then cached for 30 minutes.")
+    st.markdown("#### Today's news, ranked from cheers to jeers")
+    st.markdown('<p style="color:#475569; font-size:0.97rem; margin:0.2rem 0 1rem 0;">One click reads the latest news across dozens of major companies, scores each with FinBERT, and ranks them from the most positive coverage to the most negative. A live read on where the market\'s mood sits today.</p>', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="display:flex; gap:0.8rem; margin:0.5rem 0 1.3rem 0; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px; background:#f8fafc; border:1px solid #e6e8eb; border-radius:12px; padding:1rem 1.1rem;">
+        <div style="font-size:1.4rem; font-weight:800; color:#1e3a8a;">1</div>
+        <div style="font-weight:600; color:#0f172a; margin:0.2rem 0;">Pulls live news</div>
+        <div style="color:#64748b; font-size:0.86rem;">The latest headlines on dozens of major companies, gathered in real time.</div>
+      </div>
+      <div style="flex:1; min-width:200px; background:#f8fafc; border:1px solid #e6e8eb; border-radius:12px; padding:1rem 1.1rem;">
+        <div style="font-size:1.4rem; font-weight:800; color:#1e3a8a;">2</div>
+        <div style="font-weight:600; color:#0f172a; margin:0.2rem 0;">Scores the mood</div>
+        <div style="color:#64748b; font-size:0.86rem;">FinBERT reads each headline as positive, negative or neutral.</div>
+      </div>
+      <div style="flex:1; min-width:200px; background:#f8fafc; border:1px solid #e6e8eb; border-radius:12px; padding:1rem 1.1rem;">
+        <div style="font-size:1.4rem; font-weight:800; color:#1e3a8a;">3</div>
+        <div style="font-weight:600; color:#0f172a; margin:0.2rem 0;">Ranks the market</div>
+        <div style="color:#64748b; font-size:0.86rem;">Every company lined up from most bullish to most bearish coverage.</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
     if st.button("Scan the market", key="scan"):
         with st.spinner("Scoring sentiment across all companies..."):
             ov = market_overview()
