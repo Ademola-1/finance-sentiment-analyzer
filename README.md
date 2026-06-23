@@ -67,4 +67,4 @@ For research and educational use only. This is not financial advice.
 ## Author
 
 Built by Mubarak Lawal.
-Portfolio: [https://mubaraklawal.com/]
+Portfolio: [mubaraklawal.com](https://mubaraklawal.com/)
