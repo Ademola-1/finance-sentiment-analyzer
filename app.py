@@ -24,10 +24,17 @@ h1,h2,h3,h4 {color:#0f172a; letter-spacing:-0.01em;}
 .divider {border-top:1px solid #e6e8eb; margin:1.1rem 0 1.5rem 0;}
 .section-label {font-size:0.78rem; font-weight:700; text-transform:uppercase;
        letter-spacing:0.05em; color:#94a3b8; margin-bottom:0.4rem;}
+.insight {background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%); color:#fff;
+       border-radius:12px; padding:1.3rem 1.5rem; margin:0.3rem 0 1.2rem 0;}
+.insight .lead {font-size:0.74rem; font-weight:700; text-transform:uppercase;
+       letter-spacing:0.06em; color:#93c5fd; margin-bottom:0.45rem;}
+.insight h3 {color:#fff; font-size:1.32rem; font-weight:700; margin:0 0 0.3rem 0; line-height:1.35;}
+.insight p {color:#cbd5e1; font-size:0.93rem; margin:0;}
+.signal {display:inline-flex; align-items:center; gap:0.5rem; font-weight:700;
+       font-size:0.85rem; padding:0.3rem 0.85rem; border-radius:999px; margin-top:0.7rem;}
 .verdict {background:#f8fafc; border-left:4px solid #1e3a8a; border-radius:10px;
-          padding:1.1rem 1.3rem; margin:0.3rem 0 1.2rem 0;}
-.verdict h3 {font-size:1.3rem; font-weight:700; margin:0 0 0.4rem 0;}
-.verdict p {color:#475569; font-size:0.97rem; margin:0;}
+          padding:1rem 1.2rem; margin:0.2rem 0 1.2rem 0;}
+.verdict p {color:#475569; font-size:0.95rem; margin:0;}
 .alert {border-radius:10px; padding:1rem 1.2rem; margin:0.2rem 0 1.4rem 0;
         background:#fffbeb; border-left:4px solid #d97706;}
 .alert .tag {font-size:0.72rem; font-weight:800; text-transform:uppercase;
@@ -38,6 +45,12 @@ h1,h2,h3,h4 {color:#0f172a; letter-spacing:-0.01em;}
 .driver-neg {border-left:4px solid #dc2626;}
 .driver-label {font-size:0.75rem; font-weight:700; text-transform:uppercase;
         letter-spacing:0.04em; margin-bottom:0.35rem;}
+.impact {background:#f8fafc; border:1px solid #e6e8eb; border-radius:12px;
+        padding:1.1rem 1.3rem; margin:0.4rem 0 1rem 0;}
+.impact .t {font-size:0.78rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:0.05em; color:#94a3b8; margin-bottom:0.4rem;}
+.impact .big {font-size:1.15rem; font-weight:700; color:#0f172a;}
+.impact .sub {color:#64748b; font-size:0.86rem; margin-top:0.35rem;}
 .read-hint {color:#64748b; font-size:0.88rem; margin:0.6rem 0 0.3rem 0;}
 .ov-row {display:flex; align-items:center; gap:1rem; padding:0.7rem 0.2rem;
         border-bottom:1px solid #f1f5f9;}
@@ -59,13 +72,32 @@ tickers = {
     "GOOGL": "Alphabet (Google)", "META": "Meta", "TSLA": "Tesla", "NFLX": "Netflix",
     "AMD": "AMD", "INTC": "Intel", "ORCL": "Oracle", "CRM": "Salesforce",
     "IBM": "IBM", "ADBE": "Adobe", "UBER": "Uber", "PYPL": "PayPal",
+    "AVGO": "Broadcom", "QCOM": "Qualcomm", "TXN": "Texas Instruments", "CSCO": "Cisco",
+    "DELL": "Dell", "PLTR": "Palantir", "SHOP": "Shopify", "SPOT": "Spotify",
+    "ABNB": "Airbnb", "SNAP": "Snap", "PINS": "Pinterest", "COIN": "Coinbase",
+    "RBLX": "Roblox", "DASH": "DoorDash", "ROKU": "Roku", "ZM": "Zoom",
+    "BABA": "Alibaba", "TSM": "TSMC", "SONY": "Sony", "TM": "Toyota",
     "JPM": "JPMorgan Chase", "BAC": "Bank of America", "GS": "Goldman Sachs",
-    "WFC": "Wells Fargo", "V": "Visa", "MA": "Mastercard", "DIS": "Disney",
-    "KO": "Coca-Cola", "PEP": "PepsiCo", "MCD": "McDonald's", "SBUX": "Starbucks",
-    "NKE": "Nike", "WMT": "Walmart", "COST": "Costco", "BA": "Boeing",
+    "MS": "Morgan Stanley", "WFC": "Wells Fargo", "C": "Citigroup",
+    "AXP": "American Express", "BLK": "BlackRock", "BRK-B": "Berkshire Hathaway",
+    "V": "Visa", "MA": "Mastercard", "DIS": "Disney", "KO": "Coca-Cola",
+    "PEP": "PepsiCo", "MCD": "McDonald's", "SBUX": "Starbucks", "CMG": "Chipotle",
+    "NKE": "Nike", "LULU": "Lululemon", "WMT": "Walmart", "COST": "Costco",
+    "HD": "Home Depot", "LOW": "Lowe's", "TGT": "Target", "BA": "Boeing",
+    "DAL": "Delta Air Lines", "UAL": "United Airlines", "F": "Ford",
+    "GM": "General Motors", "RIVN": "Rivian", "GE": "GE Aerospace",
     "XOM": "ExxonMobil", "CVX": "Chevron", "PFE": "Pfizer", "JNJ": "Johnson & Johnson",
-    "T": "AT&T", "VZ": "Verizon", "F": "Ford", "GM": "General Motors", "GE": "GE Aerospace"
+    "LLY": "Eli Lilly", "ABBV": "AbbVie", "UNH": "UnitedHealth", "CVS": "CVS Health",
+    "MRNA": "Moderna", "T": "AT&T", "VZ": "Verizon"
 }
+
+OVERVIEW_SYMBOLS = [
+    "AAPL","MSFT","NVDA","AMZN","GOOGL","META","TSLA","NFLX","AMD","AVGO",
+    "INTC","QCOM","CRM","ADBE","ORCL","PLTR","UBER","SHOP","COIN","DELL",
+    "JPM","BAC","GS","MS","V","MA","BLK","AXP",
+    "DIS","KO","MCD","SBUX","NKE","WMT","COST","HD","BA",
+    "XOM","CVX","LLY","UNH","JNJ"
+]
 
 @st.cache_resource
 def load_model():
@@ -106,7 +138,8 @@ def weighted_score(labels, scores):
 def market_overview(limit=25):
     model = load_model()
     rows = []
-    for sym, nm in tickers.items():
+    for sym in OVERVIEW_SYMBOLS:
+        nm = tickers[sym]
         news = get_news(nm)
         if news.empty:
             continue
@@ -139,19 +172,38 @@ def analyze(symbol, name):
     prices = get_prices(symbol)
     return news, net_ratio, prices
 
-def relationship(net_ratio, prices):
+def aligned(net_ratio, prices):
     s, p = net_ratio.dropna(), prices.dropna()
     if len(s) < 6 or len(p) < 6:
-        return None
+        return None, None
     sd = pd.Series(s.values, index=[d.date() for d in s.index])
     pp = pd.Series([float(x) for x in p.values], index=[d.date() for d in p.index])
     common = sorted(set(sd.index) & set(pp.index))
     if len(common) < 6:
+        return None, None
+    return sd.loc[common].astype(float), pp.loc[common].astype(float)
+
+def relationship(net_ratio, prices):
+    m, p = aligned(net_ratio, prices)
+    if m is None or m.std() == 0 or p.std() == 0:
         return None
-    sa, pa = sd.loc[common].astype(float), pp.loc[common].astype(float)
-    if sa.std() == 0 or pa.std() == 0:
+    return float(np.corrcoef(m.values, p.values)[0, 1])
+
+def sentiment_impact(net_ratio, prices):
+    m, p = aligned(net_ratio, prices)
+    if m is None or len(m) < 8 or m.std() == 0:
         return None
-    return float(np.corrcoef(sa.values, pa.values)[0, 1])
+    ret = p.pct_change()
+    df = pd.DataFrame({"mood": m, "ret": ret}).dropna()
+    if len(df) < 8 or df["mood"].std() == 0:
+        return None
+    x, y = df["mood"].values, df["ret"].values
+    b, a = np.polyfit(x, y, 1)
+    pred = a + b * x
+    ss_res = float(np.sum((y - pred) ** 2))
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 0.0
+    return {"per_tenth": b * 100 * 0.1, "r2": r2, "n": len(df)}
 
 def divergence(net_ratio, prices):
     s, p = net_ratio.dropna(), prices.dropna()
@@ -160,18 +212,29 @@ def divergence(net_ratio, prices):
     ms = s.iloc[-1] - s.iloc[-min(7, len(s))]
     pc = (p.iloc[-1] - p.iloc[-min(7, len(p))]) / p.iloc[-min(7, len(p))]
     if ms > 0.05 and pc < -0.01:
-        return "News mood has been improving while the share price has been falling. When the two pull apart like this, it can flag a market that has not yet caught up to better news, a gap worth watching."
+        return "News mood has been improving while the share price has been falling. When the two pull apart like this, it can flag a market that has not yet caught up to better news."
     if ms < -0.05 and pc > 0.01:
-        return "News mood has been souring while the share price has been rising. A rising price on worsening coverage can signal momentum running ahead of the story, a gap worth watching."
+        return "News mood has been souring while the share price has been rising. A rising price on worsening coverage can signal momentum running ahead of the story."
     return None
+
+def lead_insight(name, rel):
+    if rel is None:
+        return f"How {name}'s news mood lines up with its share price", "Not enough recent data to measure the relationship yet."
+    strength = "strongly" if abs(rel) > 0.6 else "moderately" if abs(rel) > 0.3 else "weakly"
+    if rel > 0.3:
+        return (f"{name}'s news mood and share price have been moving together",
+                f"Over the recent window they tracked each other {strength} (correlation about {rel:.2f}). When coverage improved, the price tended to rise with it.")
+    if rel < -0.3:
+        return (f"{name}'s news mood and share price have been moving against each other",
+                f"Over the recent window they moved {strength} in opposite directions (correlation about {rel:.2f}). Worth a closer look at why.")
+    return (f"{name}'s news mood and share price show little clear link right now",
+            f"Over the recent window the relationship was {strength} (correlation about {rel:.2f}). Short windows are noisy, so read this as a snapshot.")
 
 def verdict_text(name, news, net_ratio, prices, score):
     c = news["sentiment"].value_counts()
     pos, neg, neu = int(c.get("positive", 0)), int(c.get("negative", 0)), int(c.get("neutral", 0))
     total = max(pos + neg + neu, 1)
     mood = "leaning positive" if score >= 55 else "leaning negative" if score <= 45 else "mixed"
-    headline = f"News on {name} is {mood} ({pos/total*100:.0f}% of recent headlines positive)"
-
     direction = ""
     r = net_ratio.dropna()
     if len(r) >= 5:
@@ -182,15 +245,13 @@ def verdict_text(name, news, net_ratio, prices, score):
             direction = "Coverage has warmed over recent days"
         else:
             direction = "Coverage has held broadly steady"
-
     price_note = ""
     p = prices.dropna()
     if len(p) >= 5:
         chg = float((p.iloc[-1] - p.iloc[-5]) / p.iloc[-5] * 100)
-        price_note = f", while the share price moved {'up' if chg > 0 else 'down'} {abs(chg):.1f}% over the same window"
-
-    note = f"{direction}{price_note}." if direction else ""
-    return headline, note, pos, neg, neu, total
+        price_note = f", and the share price moved {'up' if chg > 0 else 'down'} {abs(chg):.1f}%"
+    summary = f"News on {name} is currently {mood} ({pos/total*100:.0f}% of recent headlines positive). {direction}{price_note}." if direction else f"News on {name} is currently {mood} ({pos/total*100:.0f}% of recent headlines positive)."
+    return summary, pos, neg, neu, total
 
 def meter(score):
     label, color = score_meta(score)
@@ -256,7 +317,7 @@ def plotly_chart(name, symbol, prices, net_ratio):
 st.markdown("""
 <div class="hero">
   <h1>Market Sentiment Monitor</h1>
-  <p>Pick a major company and see how the mood of its news lines up with its share price. Powered by FinBERT, a model trained to read financial language, with an alert for the moments when the news and the price disagree.</p>
+  <p>Pick a major company and see how the mood of its news lines up with its share price. Powered by FinBERT, a model trained to read financial language, with a signal for the moments when news and price disagree.</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -289,7 +350,7 @@ with tab2:
     with ca:
         options = sorted(tickers.keys(), key=lambda s: tickers[s].lower())
         symbol = st.selectbox("Company", options,
-                              format_func=lambda s: f"{tickers[s]} ({s})",
+                              format_func=lambda s: tickers[s],
                               label_visibility="collapsed")
     with cb:
         run = st.button("Analyze", use_container_width=True, key="dive")
@@ -303,31 +364,49 @@ with tab2:
             st.warning(f"Could not find enough recent data for {name}. Try another company.")
         else:
             score = weighted_score(news["sentiment"].tolist(), news["confidence"].tolist())
-            headline, note, pos, neg, neu, total = verdict_text(name, news, net_ratio, prices, score)
+            rel = relationship(net_ratio, prices)
 
-            st.markdown(f'<div class="verdict"><h3>{headline}</h3><p>{note}</p></div>', unsafe_allow_html=True)
-
+            # 1. LEAD WITH THE RELATIONSHIP (the solution)
+            lead_h, lead_p = lead_insight(name, rel)
             div_msg = divergence(net_ratio, prices)
+            if div_msg:
+                sig = '<span class="signal" style="background:#fef3c7; color:#b45309;">Mood and price are diverging</span>'
+            elif rel is not None and abs(rel) > 0.3:
+                sig = '<span class="signal" style="background:#dcfce7; color:#15803d;">Mood and price are moving together</span>'
+            else:
+                sig = '<span class="signal" style="background:#f1f5f9; color:#64748b;">No clear link right now</span>'
+            st.markdown(f'<div class="insight"><div class="lead">Key insight</div><h3>{lead_h}</h3><p>{lead_p}</p>{sig}</div>', unsafe_allow_html=True)
+
             if div_msg:
                 st.markdown(f'<div class="alert"><div class="tag">Divergence detected</div><p>{div_msg} This is a descriptive observation, not a prediction or financial advice.</p></div>', unsafe_allow_html=True)
 
+            # 2. THE CHART (hero, with guiding caption)
+            st.markdown('<p class="read-hint">Watch how the two lines move, together or apart. Blue is the share price, red is the news mood. Hover any point for the exact date, price and mood.</p>', unsafe_allow_html=True)
+            st.plotly_chart(plotly_chart(name, symbol, prices, net_ratio), use_container_width=True)
+
+            # 3. SENTIMENT IMPACT (regression feature)
+            imp = sentiment_impact(net_ratio, prices)
+            if imp is not None:
+                conf = "a clear" if imp["r2"] > 0.3 else "a modest" if imp["r2"] > 0.1 else "a faint"
+                st.markdown(
+                    f'<div class="impact"><div class="t">Sentiment impact (linear regression)</div>'
+                    f'<div class="big">A 0.1 rise in news mood was associated with a {imp["per_tenth"]:+.2f}% move in the share price.</div>'
+                    f'<div class="sub">The regression explains {conf} share of the price movement (R squared about {imp["r2"]:.2f}, based on {imp["n"]} days). Association over a short window, not causation.</div></div>',
+                    unsafe_allow_html=True)
+
+            # 4. THE BREAKDOWN
+            st.markdown("#### The breakdown")
+            st.markdown(f'<div class="verdict"><p>{verdict_text(name, news, net_ratio, prices, score)[0]}</p></div>', unsafe_allow_html=True)
             left, right = st.columns([1, 1])
             with left:
                 st.markdown("**Overall sentiment score** (confidence-weighted)")
                 st.markdown(meter(score), unsafe_allow_html=True)
             with right:
+                _, pos, neg, neu, total = verdict_text(name, news, net_ratio, prices, score)
                 m1, m2, m3 = st.columns(3)
                 m1.metric("Positive", f"{pos/total*100:.0f}%")
                 m2.metric("Neutral", f"{neu/total*100:.0f}%")
                 m3.metric("Negative", f"{neg/total*100:.0f}%")
-                rel = relationship(net_ratio, prices)
-                if rel is not None:
-                    strength = "strong" if abs(rel) > 0.6 else "moderate" if abs(rel) > 0.3 else "weak"
-                    sign = "positive" if rel > 0 else "negative"
-                    st.caption(f"Over this window, mood and price showed a {strength} {sign} relationship (correlation about {rel:.2f}). Short windows are noisy, so treat this as descriptive, not predictive.")
-
-            st.markdown('<p class="read-hint">Hover any point for the exact date, price and mood. Blue: share price. Red: news mood.</p>', unsafe_allow_html=True)
-            st.plotly_chart(plotly_chart(name, symbol, prices, net_ratio), use_container_width=True)
 
             st.markdown("#### What's moving the mood")
             d1, d2 = st.columns(2)
