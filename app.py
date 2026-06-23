@@ -19,9 +19,11 @@ html, body, [class*="css"] {font-family: 'Inter', -apple-system, sans-serif;}
 h1,h2,h3,h4 {color:#0f172a; letter-spacing:-0.01em;}
 .hero {background: linear-gradient(135deg, #1e293b 0%, #1e3a8a 100%);
        border-radius: 16px; padding: 1.8rem 2rem; margin-bottom: 1.6rem; color:#fff;}
-.hero h1 {color:#fff; font-size:1.9rem; font-weight:800; margin:0;}
+.hero h1 {color:#fff; font-size:1.95rem; font-weight:800; margin:0;}
 .hero p {color:#cbd5e1; font-size:0.98rem; margin:0.5rem 0 0 0; max-width:760px; line-height:1.5;}
 .divider {border-top:1px solid #e6e8eb; margin:1.1rem 0 1.5rem 0;}
+.section-label {font-size:0.78rem; font-weight:700; text-transform:uppercase;
+       letter-spacing:0.05em; color:#94a3b8; margin-bottom:0.4rem;}
 .verdict {background:#f8fafc; border-left:4px solid #1e3a8a; border-radius:10px;
           padding:1.1rem 1.3rem; margin:0.3rem 0 1.2rem 0;}
 .verdict h3 {font-size:1.3rem; font-weight:700; margin:0 0 0.4rem 0;}
@@ -40,10 +42,10 @@ h1,h2,h3,h4 {color:#0f172a; letter-spacing:-0.01em;}
 .ov-row {display:flex; align-items:center; gap:1rem; padding:0.7rem 0.2rem;
         border-bottom:1px solid #f1f5f9;}
 .ov-rank {width:24px; color:#94a3b8; font-weight:700; font-size:0.9rem;}
-.ov-name {width:170px; font-weight:600; color:#0f172a;}
+.ov-name {width:200px; font-weight:600; color:#0f172a;}
 .ov-bar-wrap {flex:1; height:9px; background:#f1f5f9; border-radius:999px; overflow:hidden;}
 .ov-bar {height:100%; border-radius:999px;}
-.ov-score {width:100px; text-align:right; font-weight:700;}
+.ov-score {width:110px; text-align:right; font-weight:700;}
 .stButton button {background:#1e3a8a; color:#fff; border:none; border-radius:9px;
         padding:0.55rem 1.6rem; font-weight:600;}
 .stButton button:hover {background:#1e40af; color:#fff;}
@@ -54,25 +56,20 @@ div[data-testid="stMetric"] {background:#fff; border:1px solid #e6e8eb;
 
 tickers = {
     "AAPL": "Apple", "MSFT": "Microsoft", "NVDA": "Nvidia", "AMZN": "Amazon",
-    "GOOGL": "Google", "META": "Meta", "TSLA": "Tesla", "NFLX": "Netflix",
-    "AMD": "AMD", "JPM": "JPMorgan", "BAC": "Bank of America", "GS": "Goldman Sachs",
-    "V": "Visa", "MA": "Mastercard", "DIS": "Disney", "KO": "Coca-Cola",
-    "PEP": "PepsiCo", "WMT": "Walmart", "NKE": "Nike", "BA": "Boeing",
-    "INTC": "Intel", "ORCL": "Oracle", "CRM": "Salesforce", "UBER": "Uber",
-    "PYPL": "PayPal", "XOM": "ExxonMobil", "PFE": "Pfizer", "T": "AT&T"
+    "GOOGL": "Alphabet (Google)", "META": "Meta", "TSLA": "Tesla", "NFLX": "Netflix",
+    "AMD": "AMD", "INTC": "Intel", "ORCL": "Oracle", "CRM": "Salesforce",
+    "IBM": "IBM", "ADBE": "Adobe", "UBER": "Uber", "PYPL": "PayPal",
+    "JPM": "JPMorgan Chase", "BAC": "Bank of America", "GS": "Goldman Sachs",
+    "WFC": "Wells Fargo", "V": "Visa", "MA": "Mastercard", "DIS": "Disney",
+    "KO": "Coca-Cola", "PEP": "PepsiCo", "MCD": "McDonald's", "SBUX": "Starbucks",
+    "NKE": "Nike", "WMT": "Walmart", "COST": "Costco", "BA": "Boeing",
+    "XOM": "ExxonMobil", "CVX": "Chevron", "PFE": "Pfizer", "JNJ": "Johnson & Johnson",
+    "T": "AT&T", "VZ": "Verizon", "F": "Ford", "GM": "General Motors", "GE": "GE Aerospace"
 }
 
 @st.cache_resource
 def load_model():
     return pipeline("text-classification", model="ProsusAI/finbert")
-
-@st.cache_data(ttl=86400)
-def resolve_name(symbol):
-    try:
-        info = yf.Ticker(symbol).get_info()
-        return info.get("shortName") or info.get("longName") or symbol
-    except Exception:
-        return symbol
 
 @st.cache_data(ttl=1800)
 def get_news(query):
@@ -259,7 +256,7 @@ def plotly_chart(name, symbol, prices, net_ratio):
 st.markdown("""
 <div class="hero">
   <h1>Market Sentiment Monitor</h1>
-  <p>Reads the latest news on any listed company with recent coverage, scores the mood with FinBERT, a model trained on financial language, then tracks it against the share price and flags where the two disagree.</p>
+  <p>Reads the latest news on a company, scores the mood with FinBERT, a model trained on financial language, then tracks it against the share price and flags where the two disagree.</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -287,23 +284,23 @@ with tab1:
                         f'Open the Deep Dive tab for the full breakdown on any company.</p>', unsafe_allow_html=True)
 
 with tab2:
-    st.markdown("Pick a company below, or type any ticker symbol (for example DIS, KO, BA) to analyze it live.")
-    ca, cb, cc = st.columns([2, 2, 1])
+    st.markdown('<p class="section-label">Choose a company</p>', unsafe_allow_html=True)
+    ca, cb = st.columns([3, 1])
     with ca:
-        picked = st.selectbox("From the list", list(tickers.keys()),
-                              format_func=lambda s: f"{tickers[s]}  ({s})", label_visibility="collapsed")
+        options = sorted(tickers.keys(), key=lambda s: tickers[s].lower())
+        symbol = st.selectbox("Company", options,
+                              format_func=lambda s: f"{tickers[s]} ({s})",
+                              label_visibility="collapsed")
     with cb:
-        typed = st.text_input("Or type a ticker", placeholder="Any ticker, e.g. DIS", label_visibility="collapsed")
-    with cc:
         run = st.button("Analyze", use_container_width=True, key="dive")
+    st.caption("Start typing a company name to filter the list.")
 
     if run:
-        symbol = typed.strip().upper() if typed.strip() else picked
-        name = tickers.get(symbol) or resolve_name(symbol)
+        name = tickers[symbol]
         with st.spinner("Reading the latest news and scoring the mood..."):
             news, net_ratio, prices = analyze(symbol, name)
         if news is None or prices is None or len(prices.dropna()) == 0:
-            st.warning(f"Could not find enough data for '{symbol}'. Check the ticker symbol and try again.")
+            st.warning(f"Could not find enough recent data for {name}. Try another company.")
         else:
             score = weighted_score(news["sentiment"].tolist(), news["confidence"].tolist())
             headline, note, pos, neg, neu, total = verdict_text(name, news, net_ratio, prices, score)
