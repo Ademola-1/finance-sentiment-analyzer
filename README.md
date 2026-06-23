@@ -2,7 +2,7 @@
 
 A live web app that reads the latest news on major companies, scores the tone with FinBERT (a language model trained on financial text), and tracks that news mood against the company's share price. It also flags moments where mood and price pull apart, which can be early signals worth watching.
 
-**Live app:** [https://finance-sentiment-analyzer.streamlit.app/]
+**Live app:** [finance-sentiment-analyzer.streamlit.app](https://finance-sentiment-analyzer.streamlit.app/)
 
 ## What it does
 
