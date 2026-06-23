@@ -256,7 +256,7 @@ def plotly_chart(name, symbol, prices, net_ratio):
 st.markdown("""
 <div class="hero">
   <h1>Market Sentiment Monitor</h1>
-  <p>Reads the latest news on a company, scores the mood with FinBERT, a model trained on financial language, then tracks it against the share price and flags where the two disagree.</p>
+  <p>Pick a major company and see how the mood of its news lines up with its share price. Powered by FinBERT, a model trained to read financial language, with an alert for the moments when the news and the price disagree.</p>
 </div>
 """, unsafe_allow_html=True)
 
