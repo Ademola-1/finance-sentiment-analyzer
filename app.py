@@ -301,16 +301,16 @@ def plotly_chart(name, symbol, prices, net_ratio):
     fig.add_hline(y=0, line_dash="dot", line_color="#cbd5e1", secondary_y=True)
     fig.update_layout(
         title=dict(text=f"<b>{name} ({symbol})</b>  News Mood vs Share Price",
-                   font=dict(size=17, color="#0f172a")),
-        height=470, plot_bgcolor="white", paper_bgcolor="white",
+                   font=dict(size=17, color="#0f172a"), y=0.97),
+        height=520, plot_bgcolor="white", paper_bgcolor="white",
         font=dict(family="Inter, sans-serif", color="#334155", size=12),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0,
+        legend=dict(orientation="h", yanchor="bottom", y=1.04, xanchor="left", x=0,
                     bgcolor="rgba(0,0,0,0)", font=dict(size=12)),
-        margin=dict(l=10, r=10, t=70, b=10),
+        margin=dict(l=10, r=10, t=80, b=20),
         hovermode="x unified",
         hoverlabel=dict(bgcolor="white", bordercolor="#e2e8f0", font_size=12))
     fig.update_xaxes(showgrid=False, linecolor="#e2e8f0",
-                     rangeslider=dict(visible=True, thickness=0.06, bgcolor="#f8fafc"))
+                     rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f8fafc"))
     fig.update_yaxes(title_text="Share Price ($)", secondary_y=False,
                      showgrid=True, gridcolor="#f1f5f9", linecolor="#e2e8f0",
                      title_font_color="#1e3a8a", tickfont_color="#1e3a8a", tickprefix="$")
@@ -328,7 +328,7 @@ st.markdown("""
 tab1, tab2 = st.tabs(["Market Overview", "Company Deep Dive"])
 
 with tab1:
-    st.markdown("#### Today's news, ranked from bullish to bearish")
+    st.markdown("#### Today's news, ranked from cheers to jeers")
     st.markdown('<p style="color:#475569; font-size:0.97rem; margin:0.2rem 0 1rem 0;">One click reads the latest news across dozens of major companies, scores each with FinBERT, and ranks them from the most positive coverage to the most negative. A live read on where the market\'s mood sits today.</p>', unsafe_allow_html=True)
     st.markdown("""
     <div style="display:flex; gap:0.8rem; margin:0.5rem 0 1.3rem 0; flex-wrap:wrap;">
