@@ -328,7 +328,7 @@ st.markdown("""
 tab1, tab2 = st.tabs(["Market Overview", "Company Deep Dive"])
 
 with tab1:
-    st.markdown("#### Today's news, ranked from cheers to jeers")
+    st.markdown("#### Today's news, ranked from bullish to bearish")
     st.markdown('<p style="color:#475569; font-size:0.97rem; margin:0.2rem 0 1rem 0;">One click reads the latest news across dozens of major companies, scores each with FinBERT, and ranks them from the most positive coverage to the most negative. A live read on where the market\'s mood sits today.</p>', unsafe_allow_html=True)
     st.markdown("""
     <div style="display:flex; gap:0.8rem; margin:0.5rem 0 1.3rem 0; flex-wrap:wrap;">
