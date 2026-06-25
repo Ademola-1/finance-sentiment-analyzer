@@ -21,6 +21,7 @@ h1,h2,h3,h4 {color:#0f172a; letter-spacing:-0.01em;}
        border-radius: 16px; padding: 1.8rem 2rem; margin-bottom: 1.6rem; color:#fff;}
 .hero h1 {color:#fff; font-size:1.95rem; font-weight:800; margin:0;}
 .hero p {color:#cbd5e1; font-size:0.98rem; margin:0.5rem 0 0 0; max-width:760px; line-height:1.5;}
+.hero-hook {color:#fff; font-size:1.3rem; font-weight:700; margin:0.7rem 0 0.2rem 0; line-height:1.4;}
 .divider {border-top:1px solid #e6e8eb; margin:1.1rem 0 1.5rem 0;}
 .section-label {font-size:0.78rem; font-weight:700; text-transform:uppercase;
        letter-spacing:0.05em; color:#94a3b8; margin-bottom:0.4rem;}
@@ -74,8 +75,8 @@ tickers = {
     "IBM": "IBM", "ADBE": "Adobe", "UBER": "Uber", "PYPL": "PayPal",
     "AVGO": "Broadcom", "QCOM": "Qualcomm", "TXN": "Texas Instruments", "CSCO": "Cisco",
     "DELL": "Dell", "PLTR": "Palantir", "SHOP": "Shopify", "SPOT": "Spotify",
-    "ABNB": "Airbnb", "SNAP": "Snap", "PINS": "Pinterest", "COIN": "Coinbase",
-    "RBLX": "Roblox", "DASH": "DoorDash", "ROKU": "Roku", "ZM": "Zoom",
+    "ABNB": "Airbnb", "SNAP": "Snap", "COIN": "Coinbase",
+    "RBLX": "Roblox", "DASH": "DoorDash",
     "BABA": "Alibaba", "TSM": "TSMC", "SONY": "Sony", "TM": "Toyota",
     "JPM": "JPMorgan Chase", "BAC": "Bank of America", "GS": "Goldman Sachs",
     "MS": "Morgan Stanley", "WFC": "Wells Fargo", "C": "Citigroup",
@@ -85,10 +86,10 @@ tickers = {
     "NKE": "Nike", "LULU": "Lululemon", "WMT": "Walmart", "COST": "Costco",
     "HD": "Home Depot", "LOW": "Lowe's", "TGT": "Target", "BA": "Boeing",
     "DAL": "Delta Air Lines", "UAL": "United Airlines", "F": "Ford",
-    "GM": "General Motors", "RIVN": "Rivian", "GE": "GE Aerospace",
+    "GM": "General Motors", "GE": "GE Aerospace",
     "XOM": "ExxonMobil", "CVX": "Chevron", "PFE": "Pfizer", "JNJ": "Johnson & Johnson",
-    "LLY": "Eli Lilly", "ABBV": "AbbVie", "UNH": "UnitedHealth", "CVS": "CVS Health",
-    "MRNA": "Moderna", "T": "AT&T", "VZ": "Verizon"
+    "LLY": "Eli Lilly", "UNH": "UnitedHealth", "CVS": "CVS Health",
+    "T": "AT&T", "VZ": "Verizon"
 }
 
 OVERVIEW_SYMBOLS = [
@@ -322,7 +323,8 @@ def plotly_chart(name, symbol, prices, net_ratio):
 st.markdown("""
 <div class="hero">
   <h1>Market Sentiment Monitor</h1>
-  <p>Pick a major company and see how the mood of its news lines up with its share price. Powered by FinBERT, a model trained to read financial language, with a signal for the moments when news and price disagree.</p>
+  <div class="hero-hook">Does the news move the stock, or the stock move the news?</div>
+  <p>Every day, hundreds of headlines shape how investors feel about a company, often before the share price reflects it. No one can read them all. This tool does: it scores the tone of the latest financial news with FinBERT, tracks that mood against the share price, and flags the moments when the two pull apart, the gaps that often matter most.</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -392,7 +394,8 @@ with tab2:
     ca, cb = st.columns([3, 1])
     with ca:
         options = sorted(tickers.keys(), key=lambda s: tickers[s].lower())
-        symbol = st.selectbox("Company", options,
+        default_idx = options.index("AAPL") if "AAPL" in options else 0
+        symbol = st.selectbox("Company", options, index=default_idx,
                               format_func=lambda s: tickers[s],
                               label_visibility="collapsed")
     with cb:
