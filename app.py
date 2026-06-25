@@ -14,20 +14,18 @@ st.set_page_config(page_title="Market Sentiment Monitor", layout="wide",
 st.markdown("""
 <style>
 #MainMenu, footer, header {visibility: hidden;}
-.stApp {background:#0b1220;}
 .block-container {padding-top: 2.2rem; max-width: 1140px;}
 html, body, [class*="css"] {font-family: 'Inter', -apple-system, sans-serif;}
-h1,h2,h3,h4 {color:#e8eef7; letter-spacing:-0.01em;}
-p, span, div, label, .stMarkdown {color:#cbd5e1;}
-.hero {background: linear-gradient(135deg, #0f1726 0%, #1e3a8a 100%); border:1px solid #243049;
+h1,h2,h3,h4 {color:#0f172a; letter-spacing:-0.01em;}
+.hero {background: linear-gradient(135deg, #1e293b 0%, #1e3a8a 100%);
        border-radius: 16px; padding: 1.8rem 2rem; margin-bottom: 1.6rem; color:#fff;}
 .hero h1 {color:#fff; font-size:1.95rem; font-weight:800; margin:0;}
-.hero p {color:#c7d3e6; font-size:0.98rem; margin:0.5rem 0 0 0; max-width:760px; line-height:1.5;}
+.hero p {color:#cbd5e1; font-size:0.98rem; margin:0.5rem 0 0 0; max-width:760px; line-height:1.5;}
 .hero-hook {color:#fff; font-size:1.3rem; font-weight:700; margin:0.7rem 0 0.2rem 0; line-height:1.4;}
-.divider {border-top:1px solid #243049; margin:1.1rem 0 1.5rem 0;}
+.divider {border-top:1px solid #e6e8eb; margin:1.1rem 0 1.5rem 0;}
 .section-label {font-size:0.78rem; font-weight:700; text-transform:uppercase;
-       letter-spacing:0.05em; color:#9fb0c8; margin-bottom:0.4rem;}
-.insight {background:linear-gradient(135deg,#0f1726 0%,#1e3a8a 100%); color:#fff; border:1px solid #243049;
+       letter-spacing:0.05em; color:#94a3b8; margin-bottom:0.4rem;}
+.insight {background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%); color:#fff;
        border-radius:12px; padding:1.3rem 1.5rem; margin:0.3rem 0 1.2rem 0;}
 .insight .lead {font-size:0.74rem; font-weight:700; text-transform:uppercase;
        letter-spacing:0.06em; color:#93c5fd; margin-bottom:0.45rem;}
@@ -35,39 +33,38 @@ p, span, div, label, .stMarkdown {color:#cbd5e1;}
 .insight p {color:#cbd5e1; font-size:0.93rem; margin:0;}
 .signal {display:inline-flex; align-items:center; gap:0.5rem; font-weight:700;
        font-size:0.85rem; padding:0.3rem 0.85rem; border-radius:999px; margin-top:0.7rem;}
-.verdict {background:#111a2b; border-left:4px solid #3b82f6; border-radius:10px;
+.verdict {background:#f8fafc; border-left:4px solid #1e3a8a; border-radius:10px;
           padding:1rem 1.2rem; margin:0.2rem 0 1.2rem 0;}
-.verdict p {color:#c7d3e6; font-size:0.95rem; margin:0;}
+.verdict p {color:#475569; font-size:0.95rem; margin:0;}
 .alert {border-radius:10px; padding:1rem 1.2rem; margin:0.2rem 0 1.4rem 0;
-        background:#2a2410; border-left:4px solid #fbbf24;}
+        background:#fffbeb; border-left:4px solid #d97706;}
 .alert .tag {font-size:0.72rem; font-weight:800; text-transform:uppercase;
-        letter-spacing:0.05em; color:#fbbf24; margin-bottom:0.3rem;}
-.alert p {margin:0; color:#f5e6c8; font-size:0.95rem;}
-.card {background:#111a2b; border:1px solid #243049; border-radius:12px; padding:1rem 1.2rem; color:#e8eef7;}
-.driver-pos {border-left:4px solid #34d399;}
-.driver-neg {border-left:4px solid #f87171;}
+        letter-spacing:0.05em; color:#b45309; margin-bottom:0.3rem;}
+.alert p {margin:0; color:#78350f; font-size:0.95rem;}
+.card {background:#fff; border:1px solid #e6e8eb; border-radius:12px; padding:1rem 1.2rem;}
+.driver-pos {border-left:4px solid #16a34a;}
+.driver-neg {border-left:4px solid #dc2626;}
 .driver-label {font-size:0.75rem; font-weight:700; text-transform:uppercase;
         letter-spacing:0.04em; margin-bottom:0.35rem;}
-.impact {background:#111a2b; border:1px solid #243049; border-radius:12px;
+.impact {background:#f8fafc; border:1px solid #e6e8eb; border-radius:12px;
         padding:1.1rem 1.3rem; margin:0.4rem 0 1rem 0;}
 .impact .t {font-size:0.78rem; font-weight:700; text-transform:uppercase;
-        letter-spacing:0.05em; color:#9fb0c8; margin-bottom:0.4rem;}
-.impact .big {font-size:1.15rem; font-weight:700; color:#e8eef7;}
-.impact .sub {color:#9fb0c8; font-size:0.86rem; margin-top:0.35rem;}
-.read-hint {color:#9fb0c8; font-size:0.88rem; margin:0.6rem 0 0.3rem 0;}
+        letter-spacing:0.05em; color:#94a3b8; margin-bottom:0.4rem;}
+.impact .big {font-size:1.15rem; font-weight:700; color:#0f172a;}
+.impact .sub {color:#64748b; font-size:0.86rem; margin-top:0.35rem;}
+.read-hint {color:#64748b; font-size:0.88rem; margin:0.6rem 0 0.3rem 0;}
 .ov-row {display:flex; align-items:center; gap:1rem; padding:0.7rem 0.2rem;
-        border-bottom:1px solid #1c2740;}
+        border-bottom:1px solid #f1f5f9;}
 .ov-rank {width:24px; color:#94a3b8; font-weight:700; font-size:0.9rem;}
-.ov-name {width:200px; font-weight:600; color:#e8eef7;}
-.ov-bar-wrap {flex:1; height:9px; background:#1c2740; border-radius:999px; overflow:hidden;}
+.ov-name {width:200px; font-weight:600; color:#0f172a;}
+.ov-bar-wrap {flex:1; height:9px; background:#f1f5f9; border-radius:999px; overflow:hidden;}
 .ov-bar {height:100%; border-radius:999px;}
 .ov-score {width:110px; text-align:right; font-weight:700;}
 .stButton button {background:#1e3a8a; color:#fff; border:none; border-radius:9px;
         padding:0.55rem 1.6rem; font-weight:600;}
 .stButton button:hover {background:#1e40af; color:#fff;}
-div[data-testid="stMetric"] {background:#111a2b; border:1px solid #243049;
+div[data-testid="stMetric"] {background:#fff; border:1px solid #e6e8eb;
         border-radius:12px; padding:0.9rem 1.1rem;}
-div[data-testid="stMetricValue"], div[data-testid="stMetricLabel"] {color:#e8eef7 !important;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -126,10 +123,10 @@ def get_prices(symbol):
 
 def score_meta(score):
     if score >= 60:
-        return "Bullish", "#34d399"
+        return "Bullish", "#16a34a"
     if score <= 40:
-        return "Bearish", "#f87171"
-    return "Neutral", "#9fb0c8"
+        return "Bearish", "#dc2626"
+    return "Neutral", "#64748b"
 
 def weighted_score(labels, scores):
     pos = sum(s for l, s in zip(labels, scores) if l == "positive")
@@ -266,8 +263,8 @@ def meter(score):
         <span style="font-size:2.8rem; font-weight:800; color:{color};">{score:.0f}<span style="font-size:1rem; color:#94a3b8; font-weight:600;"> / 100</span></span>
         <span style="background:{color}1a; color:{color}; padding:0.3rem 0.85rem; border-radius:999px; font-weight:700; font-size:0.85rem;">{label}</span>
       </div>
-      <div style="position:relative; height:11px; border-radius:999px; margin-top:0.6rem; background:linear-gradient(90deg,#f87171,#334155,#34d399);">
-        <div style="position:absolute; top:-3px; left:calc({score:.0f}% - 2px); width:4px; height:17px; background:#e8eef7; border-radius:2px;"></div>
+      <div style="position:relative; height:11px; border-radius:999px; margin-top:0.6rem; background:linear-gradient(90deg,#dc2626,#e5e7eb,#16a34a);">
+        <div style="position:absolute; top:-3px; left:calc({score:.0f}% - 2px); width:4px; height:17px; background:#0f172a; border-radius:2px;"></div>
       </div>
       <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#94a3b8; margin-top:0.3rem;">
         <span>Bearish</span><span>Neutral</span><span>Bullish</span>
@@ -276,15 +273,15 @@ def meter(score):
 
 def style_sentiment_table(news):
     rows = news[["headline", "sentiment"]].tail(15).iloc[::-1].reset_index(drop=True)
-    colors = {"positive": ("#34d399", "#10371f"),
-              "negative": ("#f87171", "#3a1414"),
-              "neutral": ("#9fb0c8", "#1c2740")}
-    html = '<div style="border:1px solid #243049; border-radius:12px; overflow:hidden;">'
+    colors = {"positive": ("#16a34a", "#dcfce7"),
+              "negative": ("#dc2626", "#fee2e2"),
+              "neutral": ("#64748b", "#f1f5f9")}
+    html = '<div style="border:1px solid #e6e8eb; border-radius:12px; overflow:hidden;">'
     for i, r in rows.iterrows():
-        bg = "#111a2b" if i % 2 == 0 else "#0f1726"
+        bg = "#ffffff" if i % 2 == 0 else "#fafbfc"
         fg, chip = colors.get(r["sentiment"], colors["neutral"])
         html += (f'<div style="display:flex; align-items:center; gap:1rem; padding:0.7rem 1rem; background:{bg}; border-bottom:1px solid #f1f5f9;">'
-                 f'<div style="flex:1; color:#e8eef7; font-size:0.92rem;">{r["headline"]}</div>'
+                 f'<div style="flex:1; color:#334155; font-size:0.92rem;">{r["headline"]}</div>'
                  f'<span style="background:{chip}; color:{fg}; padding:0.22rem 0.7rem; border-radius:999px; font-size:0.75rem; font-weight:700; text-transform:capitalize; white-space:nowrap;">{r["sentiment"]}</span>'
                  f'</div>')
     html += '</div>'
@@ -294,33 +291,33 @@ def plotly_chart(name, symbol, prices, net_ratio):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(go.Scatter(
         x=net_ratio.index, y=net_ratio.values, name="News mood",
-        line=dict(color="#f87171", width=2.4, shape="spline"),
-        fill="tozeroy", fillcolor="rgba(248,113,113,0.10)",
+        line=dict(color="#dc2626", width=2.4, shape="spline"),
+        fill="tozeroy", fillcolor="rgba(220,38,38,0.08)",
         hovertemplate="%{x|%b %d}<br>Mood: %{y:.2f}<extra></extra>"),
         secondary_y=True)
     fig.add_trace(go.Scatter(
         x=prices.index, y=prices.values, name="Share price",
-        line=dict(color="#3b82f6", width=3, shape="spline"),
+        line=dict(color="#1e3a8a", width=3, shape="spline"),
         hovertemplate="%{x|%b %d}<br>Price: $%{y:.2f}<extra></extra>"),
         secondary_y=False)
-    fig.add_hline(y=0, line_dash="dot", line_color="#334155", secondary_y=True)
+    fig.add_hline(y=0, line_dash="dot", line_color="#cbd5e1", secondary_y=True)
     fig.update_layout(
         title=dict(text=f"<b>{name} ({symbol})</b>  News Mood vs Share Price",
-                   font=dict(size=17, color="#e8eef7"), y=0.97),
-        height=520, plot_bgcolor="#111a2b", paper_bgcolor="#111a2b",
-        font=dict(family="Inter, sans-serif", color="#c7d3e6", size=12),
+                   font=dict(size=17, color="#0f172a"), y=0.97),
+        height=520, plot_bgcolor="white", paper_bgcolor="white",
+        font=dict(family="Inter, sans-serif", color="#334155", size=12),
         legend=dict(orientation="h", yanchor="bottom", y=1.04, xanchor="left", x=0,
                     bgcolor="rgba(0,0,0,0)", font=dict(size=12)),
         margin=dict(l=10, r=10, t=80, b=20),
         hovermode="x unified",
-        hoverlabel=dict(bgcolor="#0f1726", bordercolor="#243049", font_size=12))
-    fig.update_xaxes(showgrid=False, linecolor="#243049",
-                     rangeslider=dict(visible=True, thickness=0.08, bgcolor="#0f1726"))
+        hoverlabel=dict(bgcolor="white", bordercolor="#e2e8f0", font_size=12))
+    fig.update_xaxes(showgrid=False, linecolor="#e2e8f0",
+                     rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f8fafc"))
     fig.update_yaxes(title_text="Share Price ($)", secondary_y=False,
-                     showgrid=True, gridcolor="#1c2740", linecolor="#243049",
-                     title_font_color="#3b82f6", tickfont_color="#3b82f6", tickprefix="$")
+                     showgrid=True, gridcolor="#f1f5f9", linecolor="#e2e8f0",
+                     title_font_color="#1e3a8a", tickfont_color="#1e3a8a", tickprefix="$")
     fig.update_yaxes(title_text="News Mood", secondary_y=True,
-                     showgrid=False, title_font_color="#f87171", tickfont_color="#f87171", zeroline=False)
+                     showgrid=False, title_font_color="#dc2626", tickfont_color="#dc2626", zeroline=False)
     return fig
 
 st.markdown("""
@@ -335,23 +332,23 @@ tab1, tab2 = st.tabs(["Market Overview", "Company Deep Dive"])
 
 with tab1:
     st.markdown("#### Today's news, ranked from bullish to bearish")
-    st.markdown('<p style="color:#9fb0c8; font-size:0.97rem; margin:0.2rem 0 1rem 0;">News moves a stock before the numbers do. In one click, this reads the latest coverage on the world\'s biggest companies, scores the tone of every headline with FinBERT, and ranks the entire market from the most upbeat to the most uneasy. A live pulse on where sentiment sits right now.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color:#475569; font-size:0.97rem; margin:0.2rem 0 1rem 0;">News moves a stock before the numbers do. In one click, this reads the latest coverage on the world\'s biggest companies, scores the tone of every headline with FinBERT, and ranks the entire market from the most upbeat to the most uneasy. A live pulse on where sentiment sits right now.</p>', unsafe_allow_html=True)
     st.markdown("""
     <div style="display:flex; gap:0.8rem; margin:0.5rem 0 1.3rem 0; flex-wrap:wrap;">
-      <div style="flex:1; min-width:200px; background:#111a2b; border:1px solid #243049; border-radius:12px; padding:1rem 1.1rem;">
-        <div style="font-size:1.4rem; font-weight:800; color:#3b82f6;">1</div>
-        <div style="font-weight:600; color:#e8eef7; margin:0.2rem 0;">Pulls live news</div>
-        <div style="color:#9fb0c8; font-size:0.86rem;">The latest headlines on dozens of major companies, gathered in real time.</div>
+      <div style="flex:1; min-width:200px; background:#f8fafc; border:1px solid #e6e8eb; border-radius:12px; padding:1rem 1.1rem;">
+        <div style="font-size:1.4rem; font-weight:800; color:#1e3a8a;">1</div>
+        <div style="font-weight:600; color:#0f172a; margin:0.2rem 0;">Pulls live news</div>
+        <div style="color:#64748b; font-size:0.86rem;">The latest headlines on dozens of major companies, gathered in real time.</div>
       </div>
-      <div style="flex:1; min-width:200px; background:#111a2b; border:1px solid #243049; border-radius:12px; padding:1rem 1.1rem;">
-        <div style="font-size:1.4rem; font-weight:800; color:#3b82f6;">2</div>
-        <div style="font-weight:600; color:#e8eef7; margin:0.2rem 0;">Scores the mood</div>
-        <div style="color:#9fb0c8; font-size:0.86rem;">FinBERT reads each headline as positive, negative or neutral.</div>
+      <div style="flex:1; min-width:200px; background:#f8fafc; border:1px solid #e6e8eb; border-radius:12px; padding:1rem 1.1rem;">
+        <div style="font-size:1.4rem; font-weight:800; color:#1e3a8a;">2</div>
+        <div style="font-weight:600; color:#0f172a; margin:0.2rem 0;">Scores the mood</div>
+        <div style="color:#64748b; font-size:0.86rem;">FinBERT reads each headline as positive, negative or neutral.</div>
       </div>
-      <div style="flex:1; min-width:200px; background:#111a2b; border:1px solid #243049; border-radius:12px; padding:1rem 1.1rem;">
-        <div style="font-size:1.4rem; font-weight:800; color:#3b82f6;">3</div>
-        <div style="font-weight:600; color:#e8eef7; margin:0.2rem 0;">Ranks the market</div>
-        <div style="color:#9fb0c8; font-size:0.86rem;">Every company lined up from most bullish to most bearish coverage.</div>
+      <div style="flex:1; min-width:200px; background:#f8fafc; border:1px solid #e6e8eb; border-radius:12px; padding:1rem 1.1rem;">
+        <div style="font-size:1.4rem; font-weight:800; color:#1e3a8a;">3</div>
+        <div style="font-weight:600; color:#0f172a; margin:0.2rem 0;">Ranks the market</div>
+        <div style="color:#64748b; font-size:0.86rem;">Every company lined up from most bullish to most bearish coverage.</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -393,7 +390,7 @@ with tab1:
 
 with tab2:
     st.markdown("#### Go deep on one company")
-    st.markdown('<p style="color:#9fb0c8; font-size:0.97rem; margin:0.2rem 0 1rem 0;">Pick any major company to see the full story: whether its news mood and share price are moving together or pulling apart, how strongly sentiment has tracked the stock, the headlines driving the mood right now, and a live feed of the latest coverage scored one by one.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color:#475569; font-size:0.97rem; margin:0.2rem 0 1rem 0;">Pick any major company to see the full story: whether its news mood and share price are moving together or pulling apart, how strongly sentiment has tracked the stock, the headlines driving the mood right now, and a live feed of the latest coverage scored one by one.</p>', unsafe_allow_html=True)
     ca, cb = st.columns([3, 1])
     with ca:
         options = sorted(tickers.keys(), key=lambda s: tickers[s].lower())
