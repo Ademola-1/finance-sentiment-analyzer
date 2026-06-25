@@ -92,9 +92,12 @@ tickers = {
 }
 
 OVERVIEW_SYMBOLS = [
-    "AAPL","MSFT","NVDA","AMZN","GOOGL","META","TSLA","NFLX",
-    "AMD","JPM","GS","V","MA","DIS","KO","MCD",
-    "NKE","WMT","BA","XOM","LLY","UNH","JNJ","COIN"
+    "AAPL","MSFT","NVDA","AMZN","GOOGL","META","TSLA","NFLX","AMD","AVGO",
+    "INTC","QCOM","CRM","ADBE","ORCL","PLTR","UBER","SHOP","COIN","DELL",
+    "CSCO","IBM","TXN","SPOT","ABNB","BABA","TSM","SONY",
+    "JPM","BAC","GS","MS","WFC","C","V","MA","BLK","AXP",
+    "DIS","KO","PEP","MCD","SBUX","NKE","WMT","COST","HD","BA",
+    "XOM","CVX","LLY","UNH","JNJ"
 ]
 
 @st.cache_resource
@@ -133,7 +136,7 @@ def weighted_score(labels, scores):
     return max(0.0, min(100.0, 50 + 50 * (pos - neg) / total))
 
 @st.cache_data(ttl=1800, show_spinner=False)
-def market_overview(limit=15):
+def market_overview(limit=8):
     model = load_model()
     rows = []
     for sym in OVERVIEW_SYMBOLS:
@@ -319,7 +322,7 @@ def plotly_chart(name, symbol, prices, net_ratio):
 st.markdown("""
 <div class="hero">
   <h1>Market Sentiment Monitor</h1>
-  <p>Does the news move the stock, or the stock move the news? Every day, hundreds of headlines shape how investors feel about a company, often before the share price reflects it. But no one can read it all. This tool does: it scores the tone of the latest financial news with FinBERT, tracks that mood against the share price, and flags the moments when the two pull apart, the gaps that often matter most.</p>
+  <p>Pick a major company and see how the mood of its news lines up with its share price. Powered by FinBERT, a model trained to read financial language, with a signal for the moments when news and price disagree.</p>
 </div>
 """, unsafe_allow_html=True)
 
