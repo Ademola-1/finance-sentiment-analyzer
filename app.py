@@ -92,11 +92,9 @@ tickers = {
 }
 
 OVERVIEW_SYMBOLS = [
-    "AAPL","MSFT","NVDA","AMZN","GOOGL","META","TSLA","NFLX","AMD","AVGO",
-    "INTC","QCOM","CRM","ADBE","ORCL","PLTR","UBER","SHOP","COIN","DELL",
-    "JPM","BAC","GS","MS","V","MA","BLK","AXP",
-    "DIS","KO","MCD","SBUX","NKE","WMT","COST","HD","BA",
-    "XOM","CVX","LLY","UNH","JNJ"
+    "AAPL","MSFT","NVDA","AMZN","GOOGL","META","TSLA","NFLX",
+    "AMD","JPM","GS","V","MA","DIS","KO","MCD",
+    "NKE","WMT","BA","XOM","LLY","UNH","JNJ","COIN"
 ]
 
 @st.cache_resource
@@ -135,7 +133,7 @@ def weighted_score(labels, scores):
     return max(0.0, min(100.0, 50 + 50 * (pos - neg) / total))
 
 @st.cache_data(ttl=1800, show_spinner=False)
-def market_overview(limit=25):
+def market_overview(limit=15):
     model = load_model()
     rows = []
     for sym in OVERVIEW_SYMBOLS:
@@ -329,7 +327,7 @@ tab1, tab2 = st.tabs(["Market Overview", "Company Deep Dive"])
 
 with tab1:
     st.markdown("#### Today's news, ranked from bullish to bearish")
-    st.markdown('<p style="color:#475569; font-size:0.97rem; margin:0.2rem 0 1rem 0;">One click reads the latest news across dozens of major companies, scores each with FinBERT, and ranks them from the most positive coverage to the most negative. A live read on where the market\'s mood sits today.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color:#475569; font-size:0.97rem; margin:0.2rem 0 1rem 0;">News moves a stock before the numbers do. In one click, this reads the latest coverage on the world\'s biggest companies, scores the tone of every headline with FinBERT, and ranks the entire market from the most upbeat to the most uneasy. A live pulse on where sentiment sits right now.</p>', unsafe_allow_html=True)
     st.markdown("""
     <div style="display:flex; gap:0.8rem; margin:0.5rem 0 1.3rem 0; flex-wrap:wrap;">
       <div style="flex:1; min-width:200px; background:#f8fafc; border:1px solid #e6e8eb; border-radius:12px; padding:1rem 1.1rem;">
@@ -350,11 +348,29 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
     if st.button("Scan the market", key="scan"):
-        with st.spinner("Scoring sentiment across all companies..."):
+        with st.spinner("Scoring sentiment across the market..."):
             ov = market_overview()
         if ov.empty:
             st.warning("Could not load market data right now. Try again shortly.")
         else:
+            bullish = int((ov["score"] >= 60).sum())
+            bearish = int((ov["score"] <= 40).sum())
+            neutral = len(ov) - bullish - bearish
+            avg = ov["score"].mean()
+            if avg >= 55:
+                tone = "leaning optimistic"
+            elif avg <= 45:
+                tone = "leaning cautious"
+            else:
+                tone = "broadly mixed"
+            st.markdown(
+                f'<div style="background:linear-gradient(135deg,#0f172a,#1e3a8a); color:#fff; '
+                f'border-radius:12px; padding:1.2rem 1.4rem; margin:0.3rem 0 1.3rem 0;">'
+                f'<div style="font-size:0.74rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#93c5fd; margin-bottom:0.4rem;">Market mood right now</div>'
+                f'<div style="font-size:1.3rem; font-weight:700;">The market is {tone} today.</div>'
+                f'<div style="color:#cbd5e1; font-size:0.92rem; margin-top:0.35rem;">'
+                f'{bullish} bullish, {neutral} neutral, {bearish} bearish across {len(ov)} major companies. Average mood score {avg:.0f} out of 100.</div></div>',
+                unsafe_allow_html=True)
             html = ""
             for i, row in ov.iterrows():
                 label, color = score_meta(row["score"])
@@ -368,7 +384,8 @@ with tab1:
                         f'Open the Deep Dive tab for the full breakdown on any company.</p>', unsafe_allow_html=True)
 
 with tab2:
-    st.markdown('<p class="section-label">Choose a company</p>', unsafe_allow_html=True)
+    st.markdown("#### Go deep on one company")
+    st.markdown('<p style="color:#475569; font-size:0.97rem; margin:0.2rem 0 1rem 0;">Pick any major company to see the full story: whether its news mood and share price are moving together or pulling apart, how strongly sentiment has tracked the stock, the headlines driving the mood right now, and a live feed of the latest coverage scored one by one.</p>', unsafe_allow_html=True)
     ca, cb = st.columns([3, 1])
     with ca:
         options = sorted(tickers.keys(), key=lambda s: tickers[s].lower())
@@ -389,7 +406,6 @@ with tab2:
             score = weighted_score(news["sentiment"].tolist(), news["confidence"].tolist())
             rel = relationship(net_ratio, prices)
 
-            # 1. LEAD WITH THE RELATIONSHIP (the solution)
             lead_h, lead_p = lead_insight(name, rel)
             div_msg = divergence(net_ratio, prices)
             if div_msg:
@@ -403,11 +419,9 @@ with tab2:
             if div_msg:
                 st.markdown(f'<div class="alert"><div class="tag">Divergence detected</div><p>{div_msg} This is a descriptive observation, not a prediction or financial advice.</p></div>', unsafe_allow_html=True)
 
-            # 2. THE CHART (hero, with guiding caption)
             st.markdown('<p class="read-hint">Watch how the two lines move, together or apart. Blue is the share price, red is the news mood. Hover any point for the exact date, price and mood.</p>', unsafe_allow_html=True)
             st.plotly_chart(plotly_chart(name, symbol, prices, net_ratio), use_container_width=True)
 
-            # 3. SENTIMENT IMPACT (regression feature)
             imp = sentiment_impact(net_ratio, prices)
             if imp is not None:
                 conf = "a clear" if imp["r2"] > 0.3 else "a modest" if imp["r2"] > 0.1 else "a faint"
@@ -417,7 +431,6 @@ with tab2:
                     f'<div class="sub">The regression explains {conf} share of the price movement (R squared about {imp["r2"]:.2f}, based on {imp["n"]} days). Association over a short window, not causation.</div></div>',
                     unsafe_allow_html=True)
 
-            # 4. THE BREAKDOWN
             st.markdown("#### The breakdown")
             st.markdown(f'<div class="verdict"><p>{verdict_text(name, news, net_ratio, prices, score)[0]}</p></div>', unsafe_allow_html=True)
             left, right = st.columns([1, 1])
