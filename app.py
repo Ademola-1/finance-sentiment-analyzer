@@ -319,7 +319,7 @@ def plotly_chart(name, symbol, prices, net_ratio):
 st.markdown("""
 <div class="hero">
   <h1>Market Sentiment Monitor</h1>
-  <p>Pick a major company and see how the mood of its news lines up with its share price. Powered by FinBERT, a model trained to read financial language, with a signal for the moments when news and price disagree.</p>
+  <p>Does the news move the stock, or the stock move the news? Every day, hundreds of headlines shape how investors feel about a company, often before the share price reflects it. But no one can read it all. This tool does: it scores the tone of the latest financial news with FinBERT, tracks that mood against the share price, and flags the moments when the two pull apart, the gaps that often matter most.</p>
 </div>
 """, unsafe_allow_html=True)
 
